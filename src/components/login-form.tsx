@@ -83,7 +83,9 @@ export function LoginForm({
               <Button type="submit" className="w-full" aria-disabled={isPending}>
                 Login
               </Button>
-              <Button type="button" variant="outline" className="w-full">
+              <Button type="button" variant="outline" className="w-full"
+                onClick={() => signIn('google')}
+              >
                 Login with Google
               </Button>
               <Button
