@@ -1,19 +1,33 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+'use client';
+
+import { cn } from "@/lib/utils";
+import {
+  ExclamationCircleIcon,
+} from '@heroicons/react/24/outline';
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { FormEvent, useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const [isPending, setIsPending] = useState(false);
+  const searchParams = useSearchParams();
+  const error = searchParams.get('error');
+  // const code = searchParams.get('code');
+  const msg = error === "CredentialsSignin" ? "Invalid credentials!" : error;
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -24,13 +38,24 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form
+            onSubmit={(e: FormEvent) => {
+              e.preventDefault();
+              setIsPending(true);
+              const data = new FormData(e.currentTarget as HTMLFormElement);
+              signIn('credentials', {
+                email: data.get('email') as string,
+                password: data.get('password') as string
+              });
+            }}
+          >
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
+                  name="email"
                   placeholder="m@example.com"
                   required
                 />
@@ -45,12 +70,20 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input name="password" id="password" type="password" required />
               </div>
-              <Button type="submit" className="w-full">
+              <div>
+                {msg && (
+                  <span className='flex gap-2 items-center text-red-500'>
+                    <ExclamationCircleIcon className="h-5 w-5" />
+                    <p className="text-sm text-red-500">{msg}</p>
+                  </span>
+                )}
+              </div>
+              <Button type="submit" className="w-full" aria-disabled={isPending}>
                 Login
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button type="button" variant="outline" className="w-full">
                 Login with Google
               </Button>
             </div>
@@ -64,5 +97,5 @@ export function LoginForm({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
