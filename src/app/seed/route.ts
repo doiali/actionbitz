@@ -1,4 +1,4 @@
-import { users, todos } from '@/lib/placeholder-data';
+import { users, entries } from '@/lib/placeholder-data';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcrypt';
 
@@ -16,30 +16,30 @@ async function seedUsers() {
   return insertedUsers;
 }
 
-async function seedTodos() {
+async function seedEntris() {
   const usersData = await prisma.user.findMany({ where: { email: { in: users.map(user => user.email) } } });
   const userIds = new Map(usersData.map(user => [user.email, user.id]));
-  const todoData: { title: string, userId: string; }[] = [];
-  todos.forEach(({ title, userEmail }) => {
+  const entryData: { title: string, userId: string; }[] = [];
+  entries.forEach(({ title, userEmail }) => {
     const userId = userIds.get(userEmail);
     if (!userId) return;
-    todoData.push({ title, userId });
+    entryData.push({ title, userId });
   });
 
-  await prisma.todo.deleteMany({ where: { userId: { in: [...userIds.values()] } } });
-  const insertedTodos = await prisma.todo.createMany({
-    data: todoData,
+  await prisma.entry.deleteMany({ where: { userId: { in: [...userIds.values()] } } });
+  const insertedEntries = await prisma.entry.createMany({
+    data: entryData,
   });
-  return insertedTodos;
+  return insertedEntries;
 }
 
 // temporary route to seed database
 export async function GET() {
   try {
     const insertedUsers = seedUsers();
-    const insertedTodos = seedTodos();
+    const insertedEntries = seedEntris();
 
-    return Response.json({ message: 'Database seeded successfully', insertedUsers, insertedTodos });
+    return Response.json({ message: 'Database seeded successfully', insertedUsers, insertedEntries });
   } catch (error) {
     return Response.json({ error }, { status: 500 });
   }

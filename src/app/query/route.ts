@@ -5,16 +5,16 @@ async function getUsers() {
   return data;
 }
 
-async function getTodos() {
-  const data = await prisma.todo.findMany();
+async function getEntries() {
+  const data = await prisma.entry.findMany();
   return data;
 }
 
 // temporary route to play with prisma
 export async function GET() {
   try {
-    const [users, todos] = await Promise.all([getUsers(), getTodos()]);
-    return Response.json({ users, todos });
+    const [users, entries] = await Promise.all([getUsers(), getEntries()]);
+    return Response.json({ users, entries });
   } catch (error) {
     return Response.json({ error }, { status: 500 });
   }
