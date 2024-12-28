@@ -22,16 +22,22 @@ model User {
   avatar    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  todos     Todo[] // Relation field to reference multiple todos
+  entries   Entry[] // Relation field to reference multiple entries
 }
 
-model Todo {
-  id          String   @id @default(uuid())
+enum EntryType {
+  TODO
+  NOTE
+}
+
+model Entry {
+  id          String    @id @default(uuid())
+  type        EntryType @default(NOTE)
   title       String
   description String?
-  completed   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  completed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
 }
