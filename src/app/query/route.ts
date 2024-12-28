@@ -1,20 +1,28 @@
 import { prisma } from '@/lib/prisma';
 
-async function getUsers() {
-  const data = await prisma.user.findMany();
-  return data;
-}
-
-async function getEntries() {
-  const data = await prisma.entry.findMany();
-  return data;
-}
-
 // temporary route to play with prisma
 export async function GET() {
   try {
-    const [users, entries] = await Promise.all([getUsers(), getEntries()]);
-    return Response.json({ users, entries });
+    const [
+      users,
+      accounts,
+      sessions,
+      tokens,
+      authenticators,
+    ] = await Promise.all([
+      prisma.user.findMany(),
+      prisma.account.findMany(),
+      prisma.session.findMany(),
+      prisma.verificationToken.findMany(),
+      prisma.authenticator.findMany(),
+    ]);
+    return Response.json({
+      users,
+      accounts,
+      sessions,
+      tokens,
+      authenticators,
+    });
   } catch (error) {
     return Response.json({ error }, { status: 500 });
   }
