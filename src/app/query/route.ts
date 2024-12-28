@@ -10,8 +10,14 @@ export async function GET() {
       tokens,
       authenticators,
     ] = await Promise.all([
-      prisma.user.findMany(),
-      prisma.account.findMany(),
+      prisma.user.findMany({ select: { id: true, email: true, name: true } }),
+      prisma.account.findMany({
+        select: {
+          userId: true,
+          session_state: true,
+          provider: true,
+        }
+      }),
       prisma.session.findMany(),
       prisma.verificationToken.findMany(),
       prisma.authenticator.findMany(),

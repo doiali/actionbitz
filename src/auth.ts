@@ -2,7 +2,7 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
-import { PrismaAdapter } from "@auth/prisma-adapter"
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
@@ -37,8 +37,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   providers: [
-    GitHub,
-    Google,
+    GitHub({ allowDangerousEmailAccountLinking: true }),
+    Google({ allowDangerousEmailAccountLinking: true }),
     Credentials({
       async authorize(credentials) {
         const parsedCredentials = z
