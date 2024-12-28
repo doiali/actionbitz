@@ -8,7 +8,11 @@ async function seedUsers() {
     resolve({ ...user, password: hashedPassword });
   })));
 
-  await prisma.user.deleteMany({ where: { email: { in: data.map(user => user.email) } } });
+  const usersData = await prisma.user.findMany({ where: { email: { in: users.map(user => user.email) } } });
+  const userIds = new Map(usersData.map(user => [user.email, user.id]));
+
+  await prisma.entry.deleteMany({ where: { userId: { in: [...userIds.values()] } } });
+  await prisma.user.deleteMany({ where: { id: { in: [...userIds.values()] } } });
 
   const insertedUsers = await prisma.user.createMany({
     data,
@@ -26,7 +30,6 @@ async function seedEntris() {
     entryData.push({ title, userId });
   });
 
-  await prisma.entry.deleteMany({ where: { userId: { in: [...userIds.values()] } } });
   const insertedEntries = await prisma.entry.createMany({
     data: entryData,
   });
