@@ -36,8 +36,8 @@ async function seedEntris() {
 // temporary route to seed database
 export async function GET() {
   try {
-    const insertedUsers = seedUsers();
-    const insertedEntries = seedEntris();
+    const insertedUsers = await seedUsers();
+    const insertedEntries = await seedEntris();
 
     return Response.json({ message: 'Database seeded successfully', insertedUsers, insertedEntries });
   } catch (error) {
