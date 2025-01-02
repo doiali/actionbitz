@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { signOut, useSession } from 'next-auth/react';
 import React from "react";
 import EntryList from './_EntryList';
-import EntryForm from './_EntryForm';
+import { EntryCreateForm } from './_EntryForm';
 
 export default function Dashboard() {
   const { data } = useSession();
@@ -25,7 +25,7 @@ export default function Dashboard() {
       </div>
       <div className="flex flex-col gap-4 py-4">
         <EntryList />
-        <EntryForm />
+        <EntryCreateForm />
       </div>
     </div>
   );

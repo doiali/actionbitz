@@ -19,3 +19,23 @@ export const useCreateEntry = ({ onSuccess }: { onSuccess?: (data: Entry) => voi
     },
   });
 };
+
+export const useUpdateEntry = ({ onSuccess }: { onSuccess?: (data: Entry) => void; } = {}) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, title, completed, type, datetime }: Partial<Entry>) => (
+      apiClient.put<Entry>(`entry/${id}`, { json: {
+        title,
+        completed,
+        type,
+        datetime: datetime?.toISOString() || undefined,
+      } }).json()
+    ),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ['entry'],
+      });
+      onSuccess?.(data);
+    },
+  });
+};
