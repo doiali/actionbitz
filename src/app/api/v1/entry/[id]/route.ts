@@ -53,19 +53,22 @@ export const PUT = auth(async function PUT(
   return NextResponse.json(({ ...newEntry, id: Number(newEntry?.id) }), { status: 200 });
 });
 
-export const DELETE = auth(async function DELETE(req) {
+export const DELETE = auth(async function DELETE(req, { params }) {
   const userId = req?.auth?.user?.id;
+  const { id } = await (params as unknown) as { id: string; };
   if (!userId)
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
-  const { title, description, datetime, type } = await req.json() as Entry;
-  const entry = await prisma.entry.create({
-    data: {
-      title,
-      type,
-      userId,
-      description,
-      datetime,
-    }
+
+  const entry = await prisma.entry.findFirst({
+    where: { userId, id: Number(id) },
   });
-  return NextResponse.json(({ ...entry, id: Number(entry.id) }), { status: 200 });
+
+  if (!entry)
+    return NextResponse.json({ message: "Not Found" }, { status: 404 });
+
+  await prisma.entry.delete({
+    where: { id: Number(id), userId },
+  });
+
+  return NextResponse.json(null, { status: 200 });
 });

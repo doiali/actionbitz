@@ -1,7 +1,10 @@
-import { useEntries, useUpdateEntry } from '@/entities/entry';
+import { useEntries, useEntryDelete, useUpdateEntry } from '@/entities/entry';
 import { Entry } from '@prisma/client';
 import EntryForm from './_EntryForm';
 import { useState } from 'react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 
 export default function EntryList() {
   const query = useEntries();
@@ -24,8 +27,11 @@ const EntryItem = ({ entry }: { entry: Entry; }) => {
     <li key={entry.id} className="py-2 border-b">
       {!edit && (
         <div key={entry.id} className="flex justify-between">
-          <span onClick={() => setEdit(true)}>{entry.title}</span>
-          <span>{entry.type}</span>
+          <span
+            className="hover:cursor-pointer grow"
+            onClick={() => setEdit(true)}
+          >{entry.title}</span>
+          <span><EntryMenu entry={entry} /></span>
         </div>
       )}
       {edit && (
@@ -35,6 +41,24 @@ const EntryItem = ({ entry }: { entry: Entry; }) => {
         />
       )}
     </li>
+  );
+};
+
+const EntryMenu = ({ entry }: { entry: Entry; }) => {
+  const mutation = useEntryDelete();
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button className="rounded-full" size="icon" variant="ghost">
+          <EllipsisVerticalIcon className="h-5 w-5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem onClick={() => mutation.mutate(Number(entry.id))}>
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
