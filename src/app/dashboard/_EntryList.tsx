@@ -1,6 +1,6 @@
-import { useEntries } from '@/entities/entry';
+import { useEntries, useUpdateEntry } from '@/entities/entry';
 import { Entry } from '@prisma/client';
-import EntryForm, { useEntryUpdateForm } from './_EntryForm';
+import EntryForm from './_EntryForm';
 import { useState } from 'react';
 
 export default function EntryList() {
@@ -31,26 +31,53 @@ const EntryItem = ({ entry }: { entry: Entry; }) => {
       {edit && (
         <EntryEditForm
           entry={entry}
-          onCancel={() => setEdit(false)}
+          onClose={() => setEdit(false)}
         />
       )}
     </li>
   );
 };
 
-const EntryEditForm = ({ entry, onCancel }: {
+const EntryEditForm = ({ entry, onClose }: {
   entry: Entry;
-  onCancel: () => void;
+  onClose: () => void;
 }) => {
-  const { state, onChange, onSubmit, disabled } = useEntryUpdateForm(entry, { onSuccess: onCancel });
+  const [state, setState] = useState<Partial<Entry>>({
+    title: entry.title,
+  });
+
+  const mutation = useUpdateEntry({
+    onSuccess: (data) => {
+      setState({
+        title: data.title,
+      });
+      onClose?.();
+    }
+  });
+
+  const onChange = <T extends keyof Entry>(name: T, value: Entry[T]) => {
+    setState((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    mutation.mutate({
+      id: entry.id,
+      title: state.title,
+      type: "TODO",
+    });
+  };
 
   return (
     <EntryForm
       state={state}
       onChange={onChange}
       onSubmit={onSubmit}
-      onCancel={onCancel}
-      disabled={disabled}
+      onCancel={onClose}
+      disabled={mutation.isPending}
     />
   );
 };
