@@ -10,7 +10,7 @@ export default function EntryList() {
   const query = useEntries();
   const { data, isLoading, isError } = query;
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className="flex flex-col">
       {isLoading && <li>Loading...</li>}
       {isError && <li>Error</li>}
       {data?.data?.map((entry) => (
@@ -26,11 +26,11 @@ const EntryItem = ({ entry }: { entry: Entry; }) => {
   return (
     <li key={entry.id} className="py-2 border-b">
       {!edit && (
-        <div key={entry.id} className="flex justify-between">
-          <span
-            className="hover:cursor-pointer grow"
+        <div key={entry.id} className="flex justify-between px-4">
+          <button
+            className="hover:cursor-pointer grow text-start"
             onClick={() => setEdit(true)}
-          >{entry.title}</span>
+          >{entry.title}</button>
           <span><EntryMenu entry={entry} /></span>
         </div>
       )}

@@ -26,7 +26,7 @@ export default function Dashboard() {
           Sign Out
         </Button>
       </div>
-      <div className="flex flex-col gap-4 py-4">
+      <div className="flex flex-col py-4">
         <EntryAddButton />
         <EntryList />
       </div>
@@ -64,7 +64,7 @@ export function EntryAddButton() {
   return (
     <div className="pb-2 border-b">
       {!showForm && (
-        <Button variant="ghost" className="ps-2 w-full justify-start" onClick={() => setShowForm(true)}>
+        <Button variant="ghost" className="w-full justify-start" onClick={() => setShowForm(true)}>
           <PlusIcon className="h-5 w-5 text-primary" /> 
           <span className="text-primary">Add Entry</span>
         </Button>

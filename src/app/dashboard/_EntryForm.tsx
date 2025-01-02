@@ -16,6 +16,7 @@ export default function EntryForm({
   return (
     <form className="flex flex-col gap-2 p-2 border rounded-md focus-within:ring-1 focus-within:ring-ring" onSubmit={onSubmit}>
       <Input
+        autoFocus
         name="title"
         value={title}
         placeholder="Title"
@@ -23,7 +24,7 @@ export default function EntryForm({
         onChange={({ target: { value, name } }) => {
           onChange(name as 'title', value);
         }}
-        className="text-lg border-none focus-visible:ring-0 ps-1"
+        className="text-lg border-none focus-visible:ring-0"
       />
       <div className="flex justify-end items-center gap-2">
         {onCancel &&
