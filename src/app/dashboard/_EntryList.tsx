@@ -1,10 +1,11 @@
-import { useEntries, useEntryDelete, useUpdateEntry } from '@/entities/entry';
+import { useEntries, useEntryDelete, useEntryUpdate } from '@/entities/entry';
 import { Entry } from '@prisma/client';
 import EntryForm from './_EntryForm';
 import { useState } from 'react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/outline';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function EntryList() {
   const query = useEntries();
@@ -20,13 +21,25 @@ export default function EntryList() {
   );
 }
 
-const EntryItem = ({ entry }: { entry: Entry; }) => {
+const EntryItem = ({ entry }: {
+  entry: Entry;
+}) => {
   const [edit, setEdit] = useState(false);
+  const mutation = useEntryUpdate();
 
   return (
     <li key={entry.id} className="py-2 border-b">
       {!edit && (
-        <div key={entry.id} className="flex justify-between px-4">
+        <div key={entry.id} className="flex items-center px-4">
+          <Checkbox
+            className="me-2"
+            checked={entry.completed}
+            onClick={() => mutation.mutate({
+              id: entry.id,
+              completed: !entry.completed,
+            })}
+            disabled={mutation.isPending}
+          />
           <button
             className="hover:cursor-pointer grow text-start"
             onClick={() => setEdit(true)}
@@ -70,7 +83,7 @@ const EntryEditForm = ({ entry, onClose }: {
     title: entry.title,
   });
 
-  const mutation = useUpdateEntry({
+  const mutation = useEntryUpdate({
     onSuccess: (data) => {
       setState({
         title: data.title,

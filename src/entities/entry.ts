@@ -7,7 +7,7 @@ export const useEntries = () => useQuery({
   queryFn: () => apiClient.get<{ data: Entry[]; }>('entry').json(),
 });
 
-export const useCreateEntry = ({ onSuccess }: { onSuccess?: (data: Entry) => void; } = {}) => {
+export const useEntryCreate = ({ onSuccess }: { onSuccess?: (data: Entry) => void; } = {}) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (entry: Partial<Entry>) => apiClient.post<Entry>('entry', { json: entry }).json(),
@@ -20,7 +20,7 @@ export const useCreateEntry = ({ onSuccess }: { onSuccess?: (data: Entry) => voi
   });
 };
 
-export const useUpdateEntry = ({ onSuccess }: { onSuccess?: (data: Entry) => void; } = {}) => {
+export const useEntryUpdate = ({ onSuccess }: { onSuccess?: (data: Entry) => void; } = {}) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, title, completed, type, datetime }: Partial<Entry>) => (

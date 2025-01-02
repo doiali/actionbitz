@@ -5,7 +5,7 @@ import { signOut, useSession } from 'next-auth/react';
 import React, { useState } from "react";
 import EntryList from './_EntryList';
 import { Entry } from '@prisma/client';
-import { useCreateEntry } from '@/entities/entry';
+import { useEntryCreate } from '@/entities/entry';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import EntryForm from './_EntryForm';
 
@@ -40,7 +40,7 @@ export function EntryAddButton() {
     title: '',
   });
 
-  const mutation = useCreateEntry({
+  const mutation = useEntryCreate({
     onSuccess: () => {
       setState({ title: '' });
       setShowForm(false);
