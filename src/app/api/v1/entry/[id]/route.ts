@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
@@ -8,7 +9,7 @@ export const GET = auth(async function GET(
   { params }
 ) {
   const userId = req?.auth?.user?.id;
-  const { id } = await (params as unknown) as { id: string; };
+  const { id } = await params as { id: string; };
   if (!userId)
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
 
@@ -20,7 +21,7 @@ export const GET = auth(async function GET(
     return NextResponse.json({ message: "Not Found" }, { status: 404 });
 
   return NextResponse.json(({ ...entry, id: Number(entry?.id) }), { status: 200 });
-});
+}) as any;
 
 export const PUT = auth(async function PUT(
   req,
@@ -51,7 +52,7 @@ export const PUT = auth(async function PUT(
   });
 
   return NextResponse.json(({ ...newEntry, id: Number(newEntry?.id) }), { status: 200 });
-});
+}) as any;
 
 export const DELETE = auth(async function DELETE(req, { params }) {
   const userId = req?.auth?.user?.id;
@@ -71,4 +72,5 @@ export const DELETE = auth(async function DELETE(req, { params }) {
   });
 
   return NextResponse.json(null, { status: 200 });
-});
+}) as any;
+

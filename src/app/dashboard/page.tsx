@@ -34,7 +34,7 @@ export default function Dashboard() {
   );
 }
 
-export function EntryAddButton() {
+function EntryAddButton() {
   const [showForm, setShowForm] = useState(false);
   const [state, setState] = useState<Partial<Entry>>({
     title: '',

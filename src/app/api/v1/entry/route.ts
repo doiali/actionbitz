@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
@@ -7,9 +8,6 @@ export const GET = auth(async function GET(req) {
   const auth = req?.auth;
   if (!auth)
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
-  // const searchParams = req.nextUrl.searchParams;
-  // const cursor = searchParams.get('cursor') || {};
-  // const limit = searchParams.get('limit') || 10;
   const userId = auth.user?.id;
   const entries = (await prisma.entry.findMany({
     where: { userId },
@@ -23,16 +21,12 @@ export const GET = auth(async function GET(req) {
       createdAt: true,
     },
     orderBy: { datetime: 'desc' },
-    // take: Number(limit),
-    // cursor: cursor ? { id: String(cursor) } : undefined,
-    // skip: cursor ? 1 : 0,
   }))
     .map((entry) => ({ ...entry, id: Number(entry.id) }));
 
-  // const nextCursor = entries.length === Number(limit) ? entries[entries.length - 1].id : null;
 
   return NextResponse.json(({ data: entries }), { status: 200 });
-});
+}) as any;
 
 export const POST = auth(async function POST(req) {
   const userId = req?.auth?.user?.id;
@@ -49,4 +43,4 @@ export const POST = auth(async function POST(req) {
     }
   });
   return NextResponse.json(({ ...entry, id: Number(entry.id) }), { status: 200 });
-});
+}) as any;
