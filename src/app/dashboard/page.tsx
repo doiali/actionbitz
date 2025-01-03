@@ -8,6 +8,7 @@ import { Entry } from '@prisma/client';
 import { useEntryCreate } from '@/entities/entry';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import EntryForm from './_EntryForm';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Dashboard() {
   const { data } = useSession();
@@ -25,6 +26,7 @@ export default function Dashboard() {
         }}>
           Sign Out
         </Button>
+        <ThemeToggle />
       </div>
       <div className="flex flex-col py-4">
         <EntryAddButton />
