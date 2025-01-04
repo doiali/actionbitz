@@ -83,12 +83,14 @@ const EntryEditForm = ({ entry, onClose }: {
 }) => {
   const [state, setState] = useState<Partial<Entry>>({
     title: entry.title,
+    datetime:entry.datetime,
   });
 
   const mutation = useEntryUpdate({
     onSuccess: (data) => {
       setState({
         title: data.title,
+        datetime: data.datetime,
       });
       onClose?.();
     }
@@ -106,6 +108,7 @@ const EntryEditForm = ({ entry, onClose }: {
     mutation.mutate({
       id: entry.id,
       title: state.title,
+      datetime: state.datetime,
       type: "TODO",
     });
   };
