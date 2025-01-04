@@ -1,3 +1,5 @@
+'use client';
+
 import { useEntries, useEntryDelete, useEntryUpdate } from '@/entities/entry';
 import { Entry } from '@prisma/client';
 import EntryForm from './_EntryForm';
