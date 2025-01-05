@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { EllipsisVerticalIcon } from '@heroicons/react/24/outline'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ChevronDown } from 'lucide-react'
+import { format } from 'date-fns'
 
 export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' | 'future' }) {
   const query = useEntryList(type)
@@ -47,7 +48,7 @@ const EntryItem = ({ entry }: {
       {!edit && (
         <div key={entry.id} className="flex items-center px-4">
           <Checkbox
-            className="me-2"
+            className="me-4"
             checked={entry.completed}
             onClick={() => mutation.mutate({
               ...entry,
@@ -56,9 +57,13 @@ const EntryItem = ({ entry }: {
             disabled={mutation.isPending}
           />
           <button
-            className="hover:cursor-pointer grow text-start"
+            className="hover:cursor-pointer grow text-start flex flex-col gap-1"
             onClick={() => setEdit(true)}
-          >{entry.title}</button>
+          >
+            <span>{entry.title}</span>
+            <span className="line-clamp-1 whitespace-pre-line text-sm text-muted-foreground">{entry.description}</span>
+            <span className="text-sm text-muted-foreground">{format(entry.datetime,'PP')}</span>
+          </button>
           <span><EntryMenu entry={entry} /></span>
         </div>
       )}

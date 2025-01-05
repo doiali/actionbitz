@@ -1,7 +1,13 @@
+import React from "react"
+import EntryList from '../_EntryList'
+import EntryAddButton from '../_EntryAddButton'
+
 export default function FuturePage() {
+
   return (
-    <div>
-      <h1>Future</h1>
+    <div className="flex flex-col py-4">
+      <EntryAddButton />
+      <EntryList type="future" />
     </div>
-  );
+  )
 }

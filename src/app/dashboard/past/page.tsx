@@ -1,21 +1,13 @@
-'use client'
-
-import { Calendar } from '@/components/ui/calendar'
-import { startOfToday } from 'date-fns'
-import { useState } from 'react'
+import React from "react"
+import EntryList from '../_EntryList'
+import EntryAddButton from '../_EntryAddButton'
 
 export default function PastPage() {
-  const [date, setDate] = useState<Date | undefined>(new Date())
 
   return (
-    <div className="flex p-4">
-      <Calendar
-        disabled={(date) => date < startOfToday()}
-        mode="single"
-        selected={date}
-        onSelect={setDate}
-        className="rounded-md border shadow"
-      />
+    <div className="flex flex-col py-4">
+      <EntryAddButton />
+      <EntryList type="past" />
     </div>
   )
 }
