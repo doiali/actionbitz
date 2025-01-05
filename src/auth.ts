@@ -79,15 +79,15 @@ type NextAuthenticatedRequest = NextRequest & {
   }
 }
 
-type RouteHandlerFn = (
+export type RouteHandlerAuthFn<T extends Record<string, string | string[] | undefined>> = (
   req: NextAuthenticatedRequest,
-  ctx: { params: Promise<Record<string, string | string[] | undefined>> }
+  ctx: { params: Promise<T> }
 ) => unknown
 
-export const withAuth = (fn: RouteHandlerFn) => {
+export const withAuth = <Params extends Record<string, string | string[] | undefined>>(fn: RouteHandlerAuthFn<Params>) => {
   const handler = async (
     req: NextRequest,
-    ctx: { params: Promise<Record<string, string | string[] | undefined>> }
+    ctx: { params: Promise<Params> }
   ) => {
     const session = await auth()
     if (!session?.user?.id) {
@@ -95,7 +95,12 @@ export const withAuth = (fn: RouteHandlerFn) => {
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (req as any).auth = session
-    return fn(req as NextAuthenticatedRequest, ctx)
+    try {
+      return fn(req as NextAuthenticatedRequest, ctx)
+    } catch (error) {
+      console.error(error)
+      return Response.json({ message: 'internal server error' }, { status: 500 })
+    }
   }
   return handler
 }
