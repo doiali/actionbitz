@@ -4,7 +4,7 @@ import { withAuth } from '@/auth'
 import { prisma } from './prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { EntryCreate, EntryData, EntryJson } from '@/entities/entry'
-import { startOfTomorrow, startOfYesterday } from 'date-fns'
+import { endOfTomorrow, startOfTomorrow, startOfYesterday } from 'date-fns'
 import { faker } from '@faker-js/faker'
 
 
@@ -21,21 +21,33 @@ const getPaginationParams = (req: NextRequest) => {
 const notFoundResponse = () => NextResponse.json({ message: "Not Found" }, { status: 404 })
 
 
-export const getEntries = withAuth(async (req) => {
+export const getNowEntries = withAuth(async (req) => {
   const userId = req.auth.user.id
-  const entries: EntryData[] = (await prisma.entry.findMany({
-    select: {
-      id: true, title: true, description: true,
-      datetime: true, completed: true, type: true,
-    },
-    where: { userId: userId, },
-    orderBy: [{ datetime: 'desc', }, { createdAt: 'desc', },],
-    take: MAX_LIMIT,
-  })).map((entry) => ({ ...entry, id: Number(entry.id) }))
+  const { limit, offset } = getPaginationParams(req)
 
-  return NextResponse.json({
-    data: entries,
+  const count = await prisma.entry.count({
+    where: { userId, datetime: { gt: startOfYesterday(), lt: endOfTomorrow() } }
   })
+
+  let data: EntryData[] = []
+
+  if (offset < count) {
+    data = (await prisma.entry.findMany({
+      select: {
+        id: true, title: true, description: true,
+        datetime: true, completed: true, type: true,
+      },
+      where: {
+        userId: userId,
+        datetime: { gt: startOfYesterday(), lt: endOfTomorrow() },
+      },
+      take: limit,
+      skip: offset,
+      orderBy: [{ datetime: 'desc', }, { createdAt: 'desc', },]
+    })).map((entry) => ({ ...entry, id: Number(entry.id) }))
+  }
+
+  return NextResponse.json({ data, count, limit, offset })
 })
 
 
@@ -235,7 +247,7 @@ export const createDummyEntries = withAuth(async (req) => {
   await prisma.entry.deleteMany({
     where: { userId }
   })
-  const entries = Array.from({ length: 1500 }).map(() => ({
+  const entries = Array.from({ length: 400 }).map(() => ({
     type: faker.helpers.arrayElement(['NOTE', 'TODO']),
     title: faker.lorem.sentence({ min: 3, max: 10 }),
     description: faker.lorem.paragraph({ min: 0, max: 3 }),

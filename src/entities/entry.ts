@@ -2,7 +2,15 @@ import apiClient from '@/utils/apiClient'
 import { SerializedModel } from '@/utils/types'
 import { parseDateSafe } from '@/utils/utils'
 import { EntryType } from '@prisma/client'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMemo } from 'react'
+
+export type ListAPI<T> = {
+  count: number,
+  limit?: number,
+  offset?: number,
+  data: T[],
+}
 
 export type EntryCreate = {
   title: string
@@ -38,15 +46,38 @@ export const deserializeEntry: (e: EntryJson) => EntryData = (entry: EntryJson) 
   }
 }
 
-export const useEntries = () => useQuery<{ data: EntryData[] }>({
-  queryKey: ['entry'],
-  queryFn: () => (
-    apiClient.get<{ data: EntryJson[] }>('entry').json()
-      .then(({ data }) => ({
-        data: data.map(deserializeEntry)
-      }))
-  ),
-})
+const LIMIT = 25
+
+export const useEntryList = (type: 'past' | 'now' | 'future' = 'now') => {
+  let path = 'entry/now'
+  if (type === 'past') path = 'entry/past'
+  if (type === 'future') path = 'entry/future'
+
+  const result = useInfiniteQuery<ListAPI<EntryData>>({
+    queryKey: ['entry', type],
+    queryFn: ({ pageParam }) => {
+      const { limit, offset } = pageParam as { limit: number, offset: number }
+      return apiClient.get<ListAPI<EntryJson>>(`${path}?limit=${limit}&offset=${offset}`).json()
+        .then(({ data, ...rest }) => ({
+          data: data.map(deserializeEntry),
+          ...rest
+        }))
+    },
+    initialPageParam: { limit: LIMIT, offset: 0 },
+    getNextPageParam: createNextPageParamGetter(LIMIT),
+  })
+
+  const allData = useMemo(() => {
+    const allData: EntryData[] = []
+    result.data?.pages.forEach(page => {
+      allData.push(...page.data)
+    })
+    return allData
+  }, [result.data])
+
+  return { allData, ...result }
+
+}
 
 export const useEntryCreate = ({ onSuccess }: { onSuccess?: (data: EntryData) => void } = {}) => {
   const queryClient = useQueryClient()
@@ -109,4 +140,16 @@ export const useEntryDelete = ({ onSuccess }: { onSuccess?: () => void } = {}) =
       onSuccess?.()
     },
   })
+}
+
+const createNextPageParamGetter = (limit: number) => (
+  lastPage: ListAPI<unknown>,
+  allPages: ListAPI<unknown>[]
+) => {
+  const n = allPages.length
+  const offset = n * limit
+  if (offset < lastPage.count)
+    return {
+      limit: limit, offset,
+    }
 }

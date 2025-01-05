@@ -1,23 +1,37 @@
 'use client'
 
-import { EntryCreate, EntryData, useEntries, useEntryDelete, useEntryUpdate } from '@/entities/entry'
+import { EntryCreate, EntryData, useEntryDelete, useEntryList, useEntryUpdate } from '@/entities/entry'
 import EntryForm from './_EntryForm'
 import { useState } from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { EllipsisVerticalIcon } from '@heroicons/react/24/outline'
 import { Checkbox } from '@/components/ui/checkbox'
+import { ChevronDown } from 'lucide-react'
 
-export default function EntryList() {
-  const query = useEntries()
-  const { data, isLoading, isError } = query
+export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' | 'future' }) {
+  const query = useEntryList(type)
+  const {
+    isLoading, isError, allData,
+    hasNextPage, fetchNextPage, isFetchingNextPage
+  } = query
   return (
     <ul className="flex flex-col">
       {isLoading && <li>Loading...</li>}
       {isError && <li>Error</li>}
-      {data?.data?.map((entry) => (
+      {allData.map((entry) => (
         <EntryItem key={entry.id} entry={entry} />
       ))}
+      <div className="flex justify-center mt-2">
+        <Button
+          onClick={() => fetchNextPage()}
+          disabled={!hasNextPage || isFetchingNextPage}
+          variant="ghost"
+          className={hasNextPage ? undefined : 'invisible'}
+        >
+          Load more <ChevronDown className="w-5 h-5" />
+        </Button>
+      </div>
     </ul>
   )
 }

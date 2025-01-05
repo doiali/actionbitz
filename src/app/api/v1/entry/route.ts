@@ -1,5 +1,5 @@
-import { createEntry, getEntries } from '@/lib/api'
+import { createEntry, getNowEntries } from '@/lib/api'
 
-export const GET = getEntries
+export const GET = getNowEntries
 
 export const POST = createEntry
