@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/auth'
+import { withAuth } from '@/auth'
 import { NextResponse } from 'next/server'
 import { EntryData, EntryJson } from '@/entities/entry'
 
-export const GET = auth(async function GET(
+export const GET = withAuth(async function GET(
   req,
   { params }
 ) {
@@ -21,9 +20,9 @@ export const GET = auth(async function GET(
     return NextResponse.json({ message: "Not Found" }, { status: 404 })
 
   return NextResponse.json(({ ...entry, id: Number(entry?.id) } satisfies EntryData), { status: 200 })
-}) as any
+})
 
-export const PUT = auth(async function PUT(
+export const PUT = withAuth(async function PUT(
   req,
   { params }
 ) {
@@ -52,9 +51,9 @@ export const PUT = auth(async function PUT(
   })
 
   return NextResponse.json(({ ...newEntry, id: Number(newEntry?.id) } satisfies EntryData), { status: 200 })
-}) as any
+})
 
-export const DELETE = auth(async function DELETE(req, { params }) {
+export const DELETE = withAuth(async function DELETE(req, { params }) {
   const userId = req?.auth?.user?.id
   const { id } = await (params as unknown) as { id: string }
   if (!userId)
@@ -72,5 +71,5 @@ export const DELETE = auth(async function DELETE(req, { params }) {
   })
 
   return NextResponse.json(null, { status: 200 })
-}) as any;
+})
 

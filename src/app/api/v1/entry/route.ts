@@ -1,14 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/auth'
+import { withAuth } from '@/auth'
 import { NextResponse } from 'next/server'
 import { EntryCreate, EntryData } from '@/entities/entry'
 
-export const GET = auth(async function GET(req) {
-  const auth = req?.auth
-  if (!auth)
-    return NextResponse.json({ message: "Not authenticated" }, { status: 401 })
-  const userId = auth.user?.id
+export const GET = withAuth(async function GET(req) {
+  const userId = req.auth.user.id
   const entries: EntryData[] = (await prisma.entry.findMany({
     where: { userId },
     select: {
@@ -26,12 +22,10 @@ export const GET = auth(async function GET(req) {
 
 
   return NextResponse.json(({ data: entries }), { status: 200 })
-}) as any
+})
 
-export const POST = auth(async function POST(req) {
-  const userId = req?.auth?.user?.id
-  if (!userId)
-    return NextResponse.json({ message: "Not authenticated" }, { status: 401 })
+export const POST = withAuth(async function POST(req) {
+  const userId = req.auth.user.id
   const { title, description, datetime, type } = await req.json() as EntryCreate
   const entry = await prisma.entry.create({
     data: {
@@ -43,4 +37,4 @@ export const POST = auth(async function POST(req) {
     }
   })
   return NextResponse.json(({ ...entry, id: Number(entry.id) } satisfies EntryData), { status: 200 })
-}) as any
+})

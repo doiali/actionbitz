@@ -1,13 +1,9 @@
-import { auth } from '@/auth'
+import { withAuth } from '@/auth'
 import { prisma } from '@/lib/prisma'
-import { NextResponse } from 'next/server'
 
 // temporary route to play with prisma
-export async function GET() {
-  const { user } = await auth() || {}
-  if (!user)
-    return NextResponse.json({ message: "Not authenticated" }, { status: 401 })
-
+export const GET = withAuth(async function GET(req) {
+  const userId = req.auth.user.id
   try {
     const [
       entries,
@@ -17,7 +13,7 @@ export async function GET() {
           id: true, title: true, description: true, datetime: true, completed: true, type: true,
         },
         where: {
-          userId: user.id,
+          userId: userId,
         },
         orderBy: [
           {
@@ -36,4 +32,4 @@ export async function GET() {
     console.log(error)
     return Response.json({ error }, { status: 500 })
   }
-}
+})

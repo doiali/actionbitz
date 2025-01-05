@@ -1,7 +1,8 @@
-import { prisma } from '@/lib/prisma';
+import { withAuth } from '@/auth'
+import { prisma } from '@/lib/prisma'
 
 // temporary route to play with prisma
-export async function GET() {
+export const GET = withAuth(async function GET() {
   try {
     const [
       users,
@@ -21,15 +22,15 @@ export async function GET() {
       prisma.session.findMany(),
       prisma.verificationToken.findMany(),
       prisma.authenticator.findMany(),
-    ]);
+    ])
     return Response.json({
       users,
       accounts,
       sessions,
       tokens,
       authenticators,
-    });
+    })
   } catch (error) {
-    return Response.json({ error }, { status: 500 });
+    return Response.json({ error }, { status: 500 })
   }
-}
+})
