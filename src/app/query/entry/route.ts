@@ -14,7 +14,7 @@ export async function GET() {
     ] = await Promise.all([
       prisma.entry.findMany({
         select: {
-          id: true, title: true, datetime: true, completed: true, type: true,
+          id: true, title: true, description: true, datetime: true, completed: true, type: true,
         },
         where: {
           userId: user.id,

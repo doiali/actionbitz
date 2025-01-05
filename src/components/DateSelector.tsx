@@ -29,6 +29,7 @@ export function DateSelector({ value, onChange }: {
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
+            type="button"
             variant={"outline"}
             className={cn(
               "justify-start text-left font-normal",
@@ -74,6 +75,7 @@ export function DateSelector({ value, onChange }: {
 
 const DateItem = ({ children, className, ...props }: { children?: React.ReactNode } & React.ComponentProps<"button">) => (
   <button
+    type="button"
     className={cn("relative w-full text-start gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground", className)}
     {...props}
   >

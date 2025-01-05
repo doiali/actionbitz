@@ -1,17 +1,17 @@
-'use client';
+'use client'
 
-import { useEntries, useEntryDelete, useEntryUpdate } from '@/entities/entry';
-import { Entry } from '@prisma/client';
-import EntryForm from './_EntryForm';
-import { useState } from 'react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { EllipsisVerticalIcon } from '@heroicons/react/24/outline';
-import { Checkbox } from '@/components/ui/checkbox';
+import { useEntries, useEntryDelete, useEntryUpdate } from '@/entities/entry'
+import { Entry } from '@prisma/client'
+import EntryForm from './_EntryForm'
+import { useState } from 'react'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { EllipsisVerticalIcon } from '@heroicons/react/24/outline'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export default function EntryList() {
-  const query = useEntries();
-  const { data, isLoading, isError } = query;
+  const query = useEntries()
+  const { data, isLoading, isError } = query
   return (
     <ul className="flex flex-col">
       {isLoading && <li>Loading...</li>}
@@ -20,14 +20,14 @@ export default function EntryList() {
         <EntryItem key={entry.id} entry={entry} />
       ))}
     </ul>
-  );
+  )
 }
 
 const EntryItem = ({ entry }: {
-  entry: Entry;
+  entry: Entry
 }) => {
-  const [edit, setEdit] = useState(false);
-  const mutation = useEntryUpdate();
+  const [edit, setEdit] = useState(false)
+  const mutation = useEntryUpdate()
 
   return (
     <li key={entry.id} className="py-2 border-b">
@@ -56,11 +56,11 @@ const EntryItem = ({ entry }: {
         />
       )}
     </li>
-  );
-};
+  )
+}
 
-const EntryMenu = ({ entry }: { entry: Entry; }) => {
-  const mutation = useEntryDelete();
+const EntryMenu = ({ entry }: { entry: Entry }) => {
+  const mutation = useEntryDelete()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -74,44 +74,46 @@ const EntryMenu = ({ entry }: { entry: Entry; }) => {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
-};
+  )
+}
 
 const EntryEditForm = ({ entry, onClose }: {
-  entry: Entry;
-  onClose: () => void;
+  entry: Entry
+  onClose: () => void
 }) => {
   const [state, setState] = useState<Partial<Entry>>({
     title: entry.title,
-    datetime:entry.datetime,
-  });
+    description: entry.description,
+    datetime: entry.datetime,
+  })
 
   const mutation = useEntryUpdate({
     onSuccess: (data) => {
       setState({
         title: data.title,
+        description: '',
         datetime: data.datetime,
-      });
-      onClose?.();
+      })
+      onClose?.()
     }
-  });
+  })
 
   const onChange = <T extends keyof Entry>(name: T, value: Entry[T]) => {
     setState((prev) => ({
       ...prev,
       [name]: value,
-    }));
-  };
+    }))
+  }
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onSubmit = () => {
     mutation.mutate({
       id: entry.id,
       title: state.title,
+      description: state.description,
       datetime: state.datetime,
       type: "TODO",
-    });
-  };
+    })
+  }
 
   return (
     <EntryForm
@@ -121,5 +123,5 @@ const EntryEditForm = ({ entry, onClose }: {
       onCancel={onClose}
       disabled={mutation.isPending}
     />
-  );
-};
+  )
+}

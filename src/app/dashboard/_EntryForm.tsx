@@ -3,21 +3,27 @@
 import { DateSelector } from '@/components/DateSelector'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Entry } from '@prisma/client'
+import { FormEvent } from 'react'
 
 export default function EntryForm({
   state, onChange, onSubmit, onCancel, disabled
 }: {
   state: Partial<Entry>
   onChange: <T extends keyof Entry>(name: T, value: Entry[T]) => void
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
+  onSubmit: () => void
   disabled?: boolean
   onCancel?: () => void
 }) {
-  const { title, datetime = new Date() } = state
+  const { title, datetime = new Date(), description } = state
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    onSubmit()
+  }
 
   return (
-    <form className="flex flex-col gap-2 p-2 border rounded-md focus-within:ring-1 focus-within:ring-ring" onSubmit={onSubmit}>
+    <form className="flex flex-col p-2 border rounded-md focus-within:ring-1 focus-within:ring-ring" onSubmit={handleSubmit}>
       <Input
         autoFocus
         name="title"
@@ -27,9 +33,18 @@ export default function EntryForm({
         onChange={({ target: { value, name } }) => {
           onChange(name as 'title', value)
         }}
-        className="text-lg border-none focus-visible:ring-0"
+        className="text-lg border-none py-0 focus-visible:ring-0"
       />
-      <div className="flex justify-between items-center gap-2">
+      <Textarea
+        name="description"
+        value={description || ''}
+        placeholder="Description"
+        onChange={({ target: { value, name } }) => {
+          onChange(name as 'description', value)
+        }}
+        className="text-lg border-none py-0 focus-visible:ring-0"
+      />
+      <div className="flex justify-between items-center gap-2 mt-2">
         <DateSelector value={datetime} onChange={(d) => onChange('datetime', d)} />
         <div>
           {onCancel &&
@@ -37,7 +52,7 @@ export default function EntryForm({
               Cancel
             </Button>
           }
-          <Button disabled={disabled || !title}>
+          <Button type="submit" disabled={disabled}>
             Submit
           </Button>
         </div>

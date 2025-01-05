@@ -12,11 +12,12 @@ export default function EntryAddButton() {
   const [state, setState] = useState<Partial<Entry>>({
     title: '',
     datetime: new Date(),
+    description: '',
   })
 
   const mutation = useEntryCreate({
     onSuccess: () => {
-      setState({ title: '', datetime: new Date() })
+      setState({ title: '', datetime: new Date(), description: '', })
       setShowForm(false)
     }
   })
@@ -28,11 +29,11 @@ export default function EntryAddButton() {
     }))
   }
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const onSubmit = () => {
     mutation.mutate({
       title: state.title,
       datetime: state.datetime,
+      description: state.description,
       type: 'TODO',
     })
   }
@@ -52,7 +53,7 @@ export default function EntryAddButton() {
           disabled={mutation.isPending}
           onCancel={() => {
             setShowForm(false)
-            setState({ title: '' })
+            setState({ title: '', datetime: new Date(), description: '' })
           }}
         />
       )}

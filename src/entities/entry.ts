@@ -4,18 +4,23 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 export const useEntries = () => useQuery({
   queryKey: ['entry'],
-  queryFn: () => apiClient.get<{ data: Entry[] }>('entry').json(),
+  queryFn: () => apiClient.get<{ data: Entry[] }>('entry').json().then(({ data }) => ({
+    data: data.map(d => ({ ...d, datetime: new Date(d.datetime) }))
+  })),
 })
 
 export const useEntryCreate = ({ onSuccess }: { onSuccess?: (data: Entry) => void } = {}) => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ title, datetime }: Partial<Entry>) => apiClient.post<Entry>('entry', {
-      json: {
-        title,
-        datetime: datetime?.toISOString() || undefined,
-      }
-    }).json(),
+    mutationFn: ({ title, description, datetime }: Partial<Entry>) => (
+      apiClient.post<Entry>('entry', {
+        json: {
+          title,
+          description: description || null,
+          datetime: datetime?.toISOString() || undefined,
+        }
+      }).json()
+    ),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ['entry'],
@@ -28,10 +33,11 @@ export const useEntryCreate = ({ onSuccess }: { onSuccess?: (data: Entry) => voi
 export const useEntryUpdate = ({ onSuccess }: { onSuccess?: (data: Entry) => void } = {}) => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, title, completed, type, datetime }: Partial<Entry>) => (
+    mutationFn: ({ id, title, description, completed, type, datetime }: Partial<Entry>) => (
       apiClient.put<Entry>(`entry/${id}`, {
         json: {
           title,
+          description: description || null,
           completed,
           type,
           datetime: datetime?.toISOString() || undefined,
