@@ -1,7 +1,6 @@
 'use client'
 
-import { useEntries, useEntryDelete, useEntryUpdate } from '@/entities/entry'
-import { Entry } from '@prisma/client'
+import { EntryCreate, EntryData, useEntries, useEntryDelete, useEntryUpdate } from '@/entities/entry'
 import EntryForm from './_EntryForm'
 import { useState } from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -24,7 +23,7 @@ export default function EntryList() {
 }
 
 const EntryItem = ({ entry }: {
-  entry: Entry
+  entry: EntryData
 }) => {
   const [edit, setEdit] = useState(false)
   const mutation = useEntryUpdate()
@@ -37,7 +36,7 @@ const EntryItem = ({ entry }: {
             className="me-2"
             checked={entry.completed}
             onClick={() => mutation.mutate({
-              id: entry.id,
+              ...entry,
               completed: !entry.completed,
             })}
             disabled={mutation.isPending}
@@ -59,7 +58,7 @@ const EntryItem = ({ entry }: {
   )
 }
 
-const EntryMenu = ({ entry }: { entry: Entry }) => {
+const EntryMenu = ({ entry }: { entry: EntryData }) => {
   const mutation = useEntryDelete()
   return (
     <DropdownMenu>
@@ -78,27 +77,19 @@ const EntryMenu = ({ entry }: { entry: Entry }) => {
 }
 
 const EntryEditForm = ({ entry, onClose }: {
-  entry: Entry
+  entry: EntryData
   onClose: () => void
 }) => {
-  const [state, setState] = useState<Partial<Entry>>({
-    title: entry.title,
-    description: entry.description,
-    datetime: entry.datetime,
-  })
+  const [state, setState] = useState<EntryData>({ ...entry })
 
   const mutation = useEntryUpdate({
     onSuccess: (data) => {
-      setState({
-        title: data.title,
-        description: '',
-        datetime: data.datetime,
-      })
+      setState({ ...data })
       onClose?.()
     }
   })
 
-  const onChange = <T extends keyof Entry>(name: T, value: Entry[T]) => {
+  const onChange = <T extends keyof EntryCreate>(name: T, value: EntryCreate[T]) => {
     setState((prev) => ({
       ...prev,
       [name]: value,
@@ -106,13 +97,7 @@ const EntryEditForm = ({ entry, onClose }: {
   }
 
   const onSubmit = () => {
-    mutation.mutate({
-      id: entry.id,
-      title: state.title,
-      description: state.description,
-      datetime: state.datetime,
-      type: "TODO",
-    })
+    mutation.mutate(state)
   }
 
   return (

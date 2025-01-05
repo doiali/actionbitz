@@ -4,14 +4,14 @@ import { DateSelector } from '@/components/DateSelector'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Entry } from '@prisma/client'
+import { EntryCreate } from '@/entities/entry'
 import { FormEvent } from 'react'
 
 export default function EntryForm({
   state, onChange, onSubmit, onCancel, disabled
 }: {
-  state: Partial<Entry>
-  onChange: <T extends keyof Entry>(name: T, value: Entry[T]) => void
+  state: EntryCreate
+  onChange: <T extends keyof EntryCreate>(name: T, value: EntryCreate[T]) => void
   onSubmit: () => void
   disabled?: boolean
   onCancel?: () => void

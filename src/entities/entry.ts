@@ -1,25 +1,66 @@
 import apiClient from '@/utils/apiClient'
-import { Entry } from '@prisma/client'
+import { SerializedModel } from '@/utils/types'
+import { parseDateSafe } from '@/utils/utils'
+import { EntryType } from '@prisma/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-export const useEntries = () => useQuery({
-  queryKey: ['entry'],
-  queryFn: () => apiClient.get<{ data: Entry[] }>('entry').json().then(({ data }) => ({
-    data: data.map(d => ({ ...d, datetime: new Date(d.datetime) }))
-  })),
+export type EntryCreate = {
+  title: string
+  type?: EntryType
+  description?: string | null
+  completed: boolean
+  datetime: Date
+}
+
+export type EntryData = EntryCreate & {
+  id: number
+  createdAt?: Date | null
+  updatedAt?: Date | null
+  userId?: string
+}
+
+export type EntryJson = SerializedModel<EntryData>
+
+export const getInitialEntry: () => EntryCreate = () => ({
+  title: '',
+  type: 'TODO',
+  description: '',
+  completed: false,
+  datetime: new Date(),
 })
 
-export const useEntryCreate = ({ onSuccess }: { onSuccess?: (data: Entry) => void } = {}) => {
+export const deserializeEntry: (e: EntryJson) => EntryData = (entry: EntryJson) => {
+  return {
+    ...entry,
+    datetime: new Date(entry.datetime),
+    createdAt: parseDateSafe(entry.createdAt),
+    updatedAt: parseDateSafe(entry.updatedAt),
+  }
+}
+
+export const useEntries = () => useQuery<{ data: EntryData[] }>({
+  queryKey: ['entry'],
+  queryFn: () => (
+    apiClient.get<{ data: EntryJson[] }>('entry').json()
+      .then(({ data }) => ({
+        data: data.map(deserializeEntry)
+      }))
+  ),
+})
+
+export const useEntryCreate = ({ onSuccess }: { onSuccess?: (data: EntryData) => void } = {}) => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ title, description, datetime }: Partial<Entry>) => (
-      apiClient.post<Entry>('entry', {
+    mutationFn: ({ title, description, datetime, type }: EntryCreate) => (
+      apiClient.post<EntryJson>('entry', {
         json: {
           title,
           description: description || null,
-          datetime: datetime?.toISOString() || undefined,
-        }
-      }).json()
+          type: type || 'TODO',
+          datetime: datetime.toISOString(),
+          completed: false,
+        } satisfies Omit<EntryJson, 'id'>
+      }).json().then(d => deserializeEntry(d))
     ),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
@@ -30,19 +71,21 @@ export const useEntryCreate = ({ onSuccess }: { onSuccess?: (data: Entry) => voi
   })
 }
 
-export const useEntryUpdate = ({ onSuccess }: { onSuccess?: (data: Entry) => void } = {}) => {
+export const useEntryUpdate = ({ onSuccess }: { onSuccess?: (data: EntryData) => void } = {}) => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, title, description, completed, type, datetime }: Partial<Entry>) => (
-      apiClient.put<Entry>(`entry/${id}`, {
+    mutationFn: ({
+      id, title, description, completed, type, datetime
+    }: EntryCreate & { id: number }) => (
+      apiClient.put<EntryJson>(`entry/${id}`, {
         json: {
           title,
           description: description || null,
           completed,
           type,
-          datetime: datetime?.toISOString() || undefined,
-        }
-      }).json()
+          datetime: datetime.toISOString(),
+        } satisfies Omit<EntryJson, 'id'>
+      }).json().then(d => deserializeEntry(d))
     ),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
