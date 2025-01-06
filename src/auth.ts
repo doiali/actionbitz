@@ -82,7 +82,7 @@ type NextAuthenticatedRequest = NextRequest & {
 export type RouteHandlerAuthFn<T extends Record<string, string | string[] | undefined>> = (
   req: NextAuthenticatedRequest,
   ctx: { params: Promise<T> }
-) => unknown
+) => Promise<Response>
 
 export const withAuth = <Params extends Record<string, string | string[] | undefined>>(fn: RouteHandlerAuthFn<Params>) => {
   const handler = async (
