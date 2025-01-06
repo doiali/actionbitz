@@ -1,20 +1,29 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Entry } from '@prisma/client';
+'use client'
+
+import { DateSelector } from '@/components/DateSelector'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { EntryCreate } from '@/entities/entry'
+import { FormEvent } from 'react'
 
 export default function EntryForm({
   state, onChange, onSubmit, onCancel, disabled
 }: {
-  state: Partial<Entry>;
-  onChange: <T extends keyof Entry>(name: T, value: Entry[T]) => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  disabled?: boolean;
-  onCancel?: () => void;
+  state: EntryCreate
+  onChange: <T extends keyof EntryCreate>(name: T, value: EntryCreate[T]) => void
+  onSubmit: () => void
+  disabled?: boolean
+  onCancel?: () => void
 }) {
-  const { title } = state;
+  const { title, datetime = new Date(), description } = state
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    onSubmit()
+  }
 
   return (
-    <form className="flex flex-col gap-2 p-2 border rounded-md focus-within:ring-1 focus-within:ring-ring" onSubmit={onSubmit}>
+    <form className="flex flex-col p-2 border rounded-md focus-within:ring-1 focus-within:ring-ring" onSubmit={handleSubmit}>
       <Input
         autoFocus
         name="title"
@@ -22,20 +31,32 @@ export default function EntryForm({
         placeholder="Title"
         required
         onChange={({ target: { value, name } }) => {
-          onChange(name as 'title', value);
+          onChange(name as 'title', value)
         }}
-        className="text-lg border-none focus-visible:ring-0"
+        className="text-lg border-none py-0 focus-visible:ring-0"
       />
-      <div className="flex justify-end items-center gap-2">
-        {onCancel &&
-          <Button variant="ghost" type="button" disabled={disabled} onClick={onCancel}>
-            Cancel
+      <Textarea
+        name="description"
+        value={description || ''}
+        placeholder="Description"
+        onChange={({ target: { value, name } }) => {
+          onChange(name as 'description', value)
+        }}
+        className="text-lg border-none py-0 focus-visible:ring-0"
+      />
+      <div className="flex justify-between items-center gap-2 mt-2">
+        <DateSelector value={datetime} onChange={(d) => onChange('datetime', d)} />
+        <div>
+          {onCancel &&
+            <Button variant="ghost" type="button" disabled={disabled} onClick={onCancel}>
+              Cancel
+            </Button>
+          }
+          <Button type="submit" disabled={disabled}>
+            Submit
           </Button>
-        }
-        <Button disabled={disabled || !title}>
-          Submit
-        </Button>
+        </div>
       </div>
     </form>
-  );
+  )
 }

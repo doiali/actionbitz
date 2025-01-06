@@ -1,49 +1,69 @@
-import { useEntries, useEntryDelete, useEntryUpdate } from '@/entities/entry';
-import { Entry } from '@prisma/client';
-import EntryForm from './_EntryForm';
-import { useState } from 'react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { EllipsisVerticalIcon } from '@heroicons/react/24/outline';
-import { Checkbox } from '@/components/ui/checkbox';
+'use client'
 
-export default function EntryList() {
-  const query = useEntries();
-  const { data, isLoading, isError } = query;
+import { EntryCreate, EntryData, useEntryDelete, useEntryList, useEntryUpdate } from '@/entities/entry'
+import EntryForm from './_EntryForm'
+import { useState } from 'react'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { EllipsisVerticalIcon } from '@heroicons/react/24/outline'
+import { Checkbox } from '@/components/ui/checkbox'
+import { ChevronDown } from 'lucide-react'
+import { format } from 'date-fns'
+
+export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' | 'future' }) {
+  const query = useEntryList(type)
+  const {
+    isLoading, isError, allData,
+    hasNextPage, fetchNextPage, isFetchingNextPage
+  } = query
   return (
     <ul className="flex flex-col">
       {isLoading && <li>Loading...</li>}
       {isError && <li>Error</li>}
-      {data?.data?.map((entry) => (
+      {allData.map((entry) => (
         <EntryItem key={entry.id} entry={entry} />
       ))}
+      <div className="flex justify-center mt-2">
+        <Button
+          onClick={() => fetchNextPage()}
+          disabled={!hasNextPage || isFetchingNextPage}
+          variant="ghost"
+          className={hasNextPage ? undefined : 'invisible'}
+        >
+          Load more <ChevronDown className="w-5 h-5" />
+        </Button>
+      </div>
     </ul>
-  );
+  )
 }
 
 const EntryItem = ({ entry }: {
-  entry: Entry;
+  entry: EntryData
 }) => {
-  const [edit, setEdit] = useState(false);
-  const mutation = useEntryUpdate();
+  const [edit, setEdit] = useState(false)
+  const mutation = useEntryUpdate()
 
   return (
     <li key={entry.id} className="py-2 border-b">
       {!edit && (
         <div key={entry.id} className="flex items-center px-4">
           <Checkbox
-            className="me-2"
+            className="me-4"
             checked={entry.completed}
             onClick={() => mutation.mutate({
-              id: entry.id,
+              ...entry,
               completed: !entry.completed,
             })}
             disabled={mutation.isPending}
           />
           <button
-            className="hover:cursor-pointer grow text-start"
+            className="hover:cursor-pointer grow text-start flex flex-col gap-1"
             onClick={() => setEdit(true)}
-          >{entry.title}</button>
+          >
+            <span>{entry.title}</span>
+            <span className="line-clamp-1 whitespace-pre-line text-sm text-muted-foreground">{entry.description}</span>
+            <span className="text-sm text-muted-foreground">{format(entry.datetime,'PP')}</span>
+          </button>
           <span><EntryMenu entry={entry} /></span>
         </div>
       )}
@@ -54,11 +74,11 @@ const EntryItem = ({ entry }: {
         />
       )}
     </li>
-  );
-};
+  )
+}
 
-const EntryMenu = ({ entry }: { entry: Entry; }) => {
-  const mutation = useEntryDelete();
+const EntryMenu = ({ entry }: { entry: EntryData }) => {
+  const mutation = useEntryDelete()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -72,41 +92,32 @@ const EntryMenu = ({ entry }: { entry: Entry; }) => {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
-};
+  )
+}
 
 const EntryEditForm = ({ entry, onClose }: {
-  entry: Entry;
-  onClose: () => void;
+  entry: EntryData
+  onClose: () => void
 }) => {
-  const [state, setState] = useState<Partial<Entry>>({
-    title: entry.title,
-  });
+  const [state, setState] = useState<EntryData>({ ...entry })
 
   const mutation = useEntryUpdate({
     onSuccess: (data) => {
-      setState({
-        title: data.title,
-      });
-      onClose?.();
+      setState({ ...data })
+      onClose?.()
     }
-  });
+  })
 
-  const onChange = <T extends keyof Entry>(name: T, value: Entry[T]) => {
+  const onChange = <T extends keyof EntryCreate>(name: T, value: EntryCreate[T]) => {
     setState((prev) => ({
       ...prev,
       [name]: value,
-    }));
-  };
+    }))
+  }
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    mutation.mutate({
-      id: entry.id,
-      title: state.title,
-      type: "TODO",
-    });
-  };
+  const onSubmit = () => {
+    mutation.mutate(state)
+  }
 
   return (
     <EntryForm
@@ -116,5 +127,5 @@ const EntryEditForm = ({ entry, onClose }: {
       onCancel={onClose}
       disabled={mutation.isPending}
     />
-  );
-};
+  )
+}
