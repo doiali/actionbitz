@@ -10,7 +10,6 @@ import { UserMenu } from './UserMenu'
 import { LifeBuoy, Send } from 'lucide-react'
 import { NavSecondary } from './nav-secondary'
 
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
@@ -22,7 +21,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
       </SidebarFooter>
-    </Sidebar>
+    </Sidebar >
   )
 }
 
