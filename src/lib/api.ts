@@ -4,7 +4,7 @@ import { withAuth } from '@/auth'
 import { prisma } from './prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { EntryCreate, EntryData, EntryJson } from '@/entities/entry'
-import { endOfTomorrow, startOfTomorrow, startOfYesterday } from 'date-fns'
+import { endOfToday, startOfToday } from 'date-fns'
 import { faker } from '@faker-js/faker'
 
 
@@ -26,7 +26,7 @@ export const getNowEntries = withAuth(async (req) => {
   const { limit, offset } = getPaginationParams(req)
 
   const count = await prisma.entry.count({
-    where: { userId, datetime: { gt: startOfYesterday(), lt: endOfTomorrow() } }
+    where: { userId, datetime: { gte: startOfToday(), lt: endOfToday() } }
   })
 
   let data: EntryData[] = []
@@ -39,7 +39,7 @@ export const getNowEntries = withAuth(async (req) => {
       },
       where: {
         userId: userId,
-        datetime: { gt: startOfYesterday(), lt: endOfTomorrow() },
+        datetime: { gte: startOfToday(), lt: endOfToday() },
       },
       take: limit,
       skip: offset,
@@ -56,7 +56,7 @@ export const getPastEntries = withAuth(async (req) => {
   const { limit, offset } = getPaginationParams(req)
 
   const count = await prisma.entry.count({
-    where: { userId, datetime: { lt: startOfYesterday() } }
+    where: { userId, datetime: { lt: startOfToday() } }
   })
 
   let data: EntryData[] = []
@@ -69,7 +69,7 @@ export const getPastEntries = withAuth(async (req) => {
       },
       where: {
         userId: userId,
-        datetime: { lt: startOfYesterday() },
+        datetime: { lt: startOfToday() },
       },
       take: limit,
       skip: offset,
@@ -86,7 +86,7 @@ export const getFutureEntries = withAuth(async (req) => {
   const { limit, offset } = getPaginationParams(req)
 
   const count = await prisma.entry.count({
-    where: { userId, datetime: { gt: startOfTomorrow() } }
+    where: { userId, datetime: { gte: endOfToday() } }
   })
 
   let data: EntryData[] = []
@@ -99,7 +99,7 @@ export const getFutureEntries = withAuth(async (req) => {
       },
       where: {
         userId: userId,
-        datetime: { gt: startOfTomorrow() },
+        datetime: { gte: endOfToday() },
       },
       take: limit,
       skip: offset,

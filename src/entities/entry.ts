@@ -2,8 +2,9 @@ import apiClient from '@/utils/apiClient'
 import { SerializedModel } from '@/utils/types'
 import { parseDateSafe } from '@/utils/utils'
 import { EntryType } from '@prisma/client'
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
+import { createDraft, Draft, produce } from 'immer'
 
 export type ListAPI<T> = {
   count: number,
@@ -95,7 +96,10 @@ export const useEntryCreate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
     ),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ['entry'],
+        queryKey: ['entry', 'now'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['entry', 'future'],
       })
       onSuccess?.(data)
     },
@@ -119,6 +123,12 @@ export const useEntryUpdate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
       }).json().then(d => deserializeEntry(d))
     ),
     onSuccess: (data) => {
+      queryClient.setQueriesData(
+        { queryKey: ['entry'] },
+        (prev?: InfiniteData<ListAPI<EntryData>>) => (
+          getUpdatedListonMutation(data, prev)
+        )
+      )
       queryClient.invalidateQueries({
         queryKey: ['entry'],
       })
@@ -133,7 +143,13 @@ export const useEntryDelete = ({ onSuccess }: { onSuccess?: () => void } = {}) =
     mutationFn: (id: number) => (
       apiClient.delete<null>(`entry/${id}`).json()
     ),
-    onSuccess: () => {
+    onSuccess: (data, id) => {
+      queryClient.setQueriesData(
+        { queryKey: ['entry'] },
+        (prev?: InfiniteData<ListAPI<EntryData>>) => (
+          getUpdatedListonDeleteMutation(id, prev)
+        )
+      )
       queryClient.invalidateQueries({
         queryKey: ['entry'],
       })
@@ -152,4 +168,74 @@ const createNextPageParamGetter = (limit: number) => (
     return {
       limit: limit, offset,
     }
+}
+
+const getUpdatedListonMutation = (
+  updatedData: EntryData,
+  prev?: InfiniteData<ListAPI<EntryData>>
+) => (
+  prev ? produce(prev, (draft) => {
+    for (const page of draft.pages) {
+      for (const storedData of page.data) {
+        if (storedData.id === updatedData.id) {
+          Object.assign(storedData, updatedData)
+          return
+        }
+      }
+    }
+  }) : undefined
+)
+
+const getUpdatedListonDeleteMutation = (
+  updatedDataId: number,
+  prev?: InfiniteData<ListAPI<EntryData>>
+) => (
+  prev ? produce(prev, (draft) => {
+    for (const page of draft.pages) {
+      page.data = page.data.filter(data => data.id !== updatedDataId)
+    }
+  }) : undefined
+)
+
+const addDataToPaginatedList = <TData extends Record<string, unknown> = EntryData>(
+  newData: TData,
+  prev: InfiniteData<ListAPI<TData>> | undefined,
+  limit: number,
+): InfiniteData<ListAPI<TData>> | undefined => {
+  return prev ? produce(prev, (draft) => {
+    let popedData: Draft<TData> | undefined = createDraft(newData)
+    draft.pages.forEach((page) => {
+      page.count = page.count + 1
+      if (popedData) {
+        page.data = [popedData, ...page.data]
+        if (page.data.length > limit) {
+          popedData = page.data.pop()
+        } else {
+          popedData = undefined
+        }
+      }
+    })
+  }) : { pages: [{ count: 1, data: [newData] }], pageParams: [] }
+}
+
+// TODO: This can't be used yet!
+const RemoveDataFromPaginatedList = <TData extends { id: string | number } = EntryData>(
+  id: string | number,
+  prev: InfiniteData<ListAPI<TData>> | undefined,
+  limit: number,
+): InfiniteData<ListAPI<TData>> | undefined => {
+  return prev ? produce(prev, (draft) => {
+    let popedData: Draft<TData> | undefined
+    draft.pages.forEach((page) => {
+      page.count = page.count - 1
+      if (popedData) {
+        page.data = [popedData, ...page.data]
+        if (page.data.length > limit) {
+          popedData = page.data.pop()
+        } else {
+          popedData = undefined
+        }
+      }
+    })
+  }) : { pages: [{ count: 0, data: [] }], pageParams: [] }
 }
