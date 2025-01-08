@@ -9,11 +9,12 @@ import { EllipsisVerticalIcon } from '@heroicons/react/24/outline'
 import { ChevronDown } from 'lucide-react'
 import { format } from 'date-fns'
 import { CheckboxTodo } from '@/components/ui/checkbox-todo'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' | 'future' }) {
   const query = useEntryList(type)
   const {
-    isLoading, isError, allData,
+    isLoading, isError, allData, isSuccess,
     hasNextPage, fetchNextPage, isFetchingNextPage
   } = query
 
@@ -39,8 +40,17 @@ export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' |
 
   return (
     <ul className="flex flex-col">
-      {isLoading && <li>Loading...</li>}
-      {isError && <li>Error</li>}
+      {isLoading && (
+        <>
+          {Array.from({ length: 10 }).map((_, index) => (
+            <li className="py-2 border-t" key={index} ><Skeleton className="h-8" /></li>
+          ))}
+        </>
+      )}
+      {isError && <li className="text-center">Error!</li>}
+      {isSuccess && !allData?.length && (
+        <li className="text-center">No Data</li>
+      )}
       {renderEntries()}
       <li className="flex justify-center mt-2">
         <Button
@@ -55,6 +65,8 @@ export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' |
     </ul>
   )
 }
+
+
 
 const EntryItem = ({ entry }: {
   entry: EntryData
