@@ -36,7 +36,7 @@ export default function EntryAddButton() {
       {!showForm && (
         <Button variant="ghost" size="lg" className="w-full justify-start [&_svg]:size-6" onClick={() => setShowForm(true)}>
           <Plus className="text-primary -ms-4" />
-          <span className="text-primary ms-2">Add Entry</span>
+          <span className="text-primary ms-2">Add Action</span>
         </Button>
       )}
       {showForm && (
