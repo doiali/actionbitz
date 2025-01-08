@@ -12,12 +12,12 @@ export default function UserButton() {
       {status === 'loading' && <p>Loading...</p>}
       {status === 'authenticated' && (
         <Button asChild>
-          <Link href="/dashboard">Dashboard</Link>
+          <Link href="/dashboard">Go to Dashboard</Link>
         </Button>
       )}
       {status === 'unauthenticated' && (
         <Button asChild>
-          <Link href="/auth/signin">Get started</Link>
+          <Link href="/auth/signin">Login</Link>
         </Button>
       )}
     </div>
