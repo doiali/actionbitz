@@ -47,9 +47,9 @@ export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' |
           ))}
         </>
       )}
-      {isError && <li className="text-center">Error!</li>}
+      {isError && <li className="py-2 text-center text-destructive">Something went wrong!</li>}
       {isSuccess && !allData?.length && (
-        <li className="text-center">No Data</li>
+        <li className="text-center py-2">No Data</li>
       )}
       {renderEntries()}
       <li className="flex justify-center mt-2">
