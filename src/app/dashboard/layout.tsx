@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="bg-background sticky top-0 flex justify-between h-12 shrink-0 items-center gap-2 px-4">
+          <header className="bg-background sticky z-10 top-0 flex justify-between h-12 shrink-0 items-center gap-2 px-4">
             <SidebarTrigger className=" -ms-2" />
             <h1 className="grow text-center text-2xl">Action<span className="text-primary">Bitz</span></h1>
             <ThemeToggle className=" -me-2" />

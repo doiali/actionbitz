@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="w-full max-w-3xl mx-auto sm:px-2">
-      <TabNav className="sticky top-12">
+      <TabNav className="sticky top-12 z-10">
         <TabNavList className="grid w-full grid-cols-3">
           <TabNavLink active={activeSegment === 'past'} asChild>
             <Link href="/dashboard/past">

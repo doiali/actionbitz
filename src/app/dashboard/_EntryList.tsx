@@ -2,13 +2,13 @@
 
 import { EntryCreate, EntryData, useEntryDelete, useEntryList, useEntryUpdate } from '@/entities/entry'
 import EntryForm from './_EntryForm'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { EllipsisVerticalIcon } from '@heroicons/react/24/outline'
-import { Checkbox } from '@/components/ui/checkbox'
 import { ChevronDown } from 'lucide-react'
 import { format } from 'date-fns'
+import { CheckboxTodo } from '@/components/ui/checkbox-todo'
 
 export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' | 'future' }) {
   const query = useEntryList(type)
@@ -16,14 +16,33 @@ export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' |
     isLoading, isError, allData,
     hasNextPage, fetchNextPage, isFetchingNextPage
   } = query
+
+  const renderEntries = useCallback(() => {
+    const elements: React.ReactNode[] = []
+    let lastDate = ''
+
+    allData.forEach((entry) => {
+      const entryDate = format(entry.datetime, 'MMMM d, yyyy')
+      if (entryDate !== lastDate && type !== 'now') {
+        elements.push(
+          <li key={entryDate} className="pt-6 ps-4 pb-1 text-sm font-bold text-muted-foreground">
+            {entryDate}
+          </li>
+        )
+        lastDate = entryDate
+      }
+      elements.push(<EntryItem key={entry.id} entry={entry} />)
+    })
+
+    return elements
+  }, [allData, type])
+
   return (
     <ul className="flex flex-col">
       {isLoading && <li>Loading...</li>}
       {isError && <li>Error</li>}
-      {allData.map((entry) => (
-        <EntryItem key={entry.id} entry={entry} />
-      ))}
-      <div className="flex justify-center mt-2">
+      {renderEntries()}
+      <li className="flex justify-center mt-2">
         <Button
           onClick={() => fetchNextPage()}
           disabled={!hasNextPage || isFetchingNextPage}
@@ -32,7 +51,7 @@ export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' |
         >
           Load more <ChevronDown className="w-5 h-5" />
         </Button>
-      </div>
+      </li>
     </ul>
   )
 }
@@ -44,11 +63,11 @@ const EntryItem = ({ entry }: {
   const mutation = useEntryUpdate()
 
   return (
-    <li key={entry.id} className="py-2 border-b">
+    <li key={entry.id} className="py-2 border-t">
       {!edit && (
         <div key={entry.id} className="flex items-center px-4">
-          <Checkbox
-            className="me-4"
+          <CheckboxTodo
+            className="me-4 w-6 h-6 rounded-full"
             checked={entry.completed}
             onClick={() => mutation.mutate({
               ...entry,
@@ -62,7 +81,6 @@ const EntryItem = ({ entry }: {
           >
             <span>{entry.title}</span>
             <span className="line-clamp-1 whitespace-pre-line text-sm text-muted-foreground">{entry.description}</span>
-            <span className="text-sm text-muted-foreground">{format(entry.datetime,'PP')}</span>
           </button>
           <span><EntryMenu entry={entry} /></span>
         </div>
