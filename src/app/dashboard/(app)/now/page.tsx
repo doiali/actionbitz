@@ -6,7 +6,7 @@ import EntryReport from '@/components/entry-report'
 export default function NowPage() {
 
   return (
-    <div className="flex flex-col py-4">
+    <div className="flex flex-col py-2">
       <EntryReport />
       <EntryAddButton />
       <EntryList type="now" />
