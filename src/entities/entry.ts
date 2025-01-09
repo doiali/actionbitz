@@ -2,7 +2,7 @@ import apiClient from '@/utils/apiClient'
 import { SerializedModel } from '@/utils/types'
 import { parseDateSafe } from '@/utils/utils'
 import { EntryType } from '@prisma/client'
-import { InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { InfiniteData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { createDraft, Draft, produce } from 'immer'
 
@@ -30,6 +30,12 @@ export type EntryData = EntryCreate & {
 
 export type EntryJson = SerializedModel<EntryData>
 
+export type EntryReport = {
+  count: number,
+  completed: number,
+  days: number,
+}
+
 export const getInitialEntry: () => EntryCreate = () => ({
   title: '',
   type: 'TODO',
@@ -49,13 +55,20 @@ export const deserializeEntry: (e: EntryJson) => EntryData = (entry: EntryJson) 
 
 const LIMIT = 25
 
-export const useEntryList = (type: 'past' | 'now' | 'future' = 'now') => {
+export const useEntryReport = (tab: 'past' | 'now' | 'future' = 'now') => {
+  return useQuery<EntryReport>({
+    queryKey: ['entry/report'],
+    queryFn: () => apiClient.get<EntryReport>('entry/report').json(),
+  })
+}
+
+export const useEntryList = (tab: 'past' | 'now' | 'future' = 'now') => {
   let path = 'entry/now'
-  if (type === 'past') path = 'entry/past'
-  if (type === 'future') path = 'entry/future'
+  if (tab === 'past') path = 'entry/past'
+  if (tab === 'future') path = 'entry/future'
 
   const result = useInfiniteQuery<ListAPI<EntryData>>({
-    queryKey: ['entry', type],
+    queryKey: ['entry', tab],
     queryFn: ({ pageParam }) => {
       const { limit, offset } = pageParam as { limit: number, offset: number }
       return apiClient.get<ListAPI<EntryJson>>(`${path}?limit=${limit}&offset=${offset}`).json()

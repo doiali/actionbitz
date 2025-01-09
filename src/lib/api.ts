@@ -3,7 +3,7 @@
 import { withAuth } from '@/auth'
 import { prisma } from './prisma'
 import { NextRequest, NextResponse } from 'next/server'
-import { EntryCreate, EntryData, EntryJson } from '@/entities/entry'
+import { EntryCreate, EntryData, EntryJson, EntryReport } from '@/entities/entry'
 import { endOfToday, startOfToday } from 'date-fns'
 import { faker } from '@faker-js/faker'
 
@@ -20,6 +20,23 @@ const getPaginationParams = (req: NextRequest) => {
 
 const notFoundResponse = () => NextResponse.json({ message: "Not Found" }, { status: 404 })
 
+export const getEntryReport = withAuth(async (req) => {
+  const userId = req.auth.user.id
+
+  const result = await prisma.$queryRaw`
+    SELECT 
+      COUNT(*) AS count,
+      SUM(CASE WHEN completed = true THEN 1 ELSE 0 END) AS completed,
+      COUNT(DISTINCT DATE(datetime)) AS days
+    FROM "Entry"
+    WHERE "userId" = ${userId}
+  `as EntryReport[]
+  const { count, completed, days } = result[0]
+
+  return NextResponse.json({
+    count: Number(count), completed: Number(completed), days: Number(days)
+  })
+})
 
 export const getNowEntries = withAuth(async (req) => {
   const userId = req.auth.user.id
