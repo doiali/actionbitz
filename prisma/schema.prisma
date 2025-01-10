@@ -97,7 +97,8 @@ model Entry {
   description String?
   isFavorite  Boolean   @default(false)
   completed   Boolean   @default(false)
-  datetime    DateTime  @default(now())
+  datetime    DateTime?  @db.Timestamptz()
+  date        DateTime  @db.Date()
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   userId      String
