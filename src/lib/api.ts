@@ -177,57 +177,11 @@ export const deleteEntry = withAuth<{ id: string }>(async (req, { params }) => {
 
 
 // Playground
-export const getAllUserEntries = withAuth(async (req) => {
-  const userId = req.auth.user.id
-  const entries: EntryData[] = (await prisma.entry.findMany({
-    select: {
-      id: true, title: true, description: true, date: true,
-      datetime: true, completed: true, type: true,
-    },
-    where: { userId: userId, },
-    orderBy: [{ datetime: 'desc', }, { createdAt: 'desc', },],
-    take: MAX_LIMIT,
-  })).map((entry) => ({ ...entry, id: Number(entry.id) }))
-
-  return NextResponse.json({ data: entries })
-})
-
-
-export const getAuthData = withAuth(async () => {
-  try {
-    const [
-      users,
-      accounts,
-      sessions,
-      tokens,
-      authenticators,
-    ] = await Promise.all([
-      prisma.user.findMany({ select: { id: true, email: true, name: true } }),
-      prisma.account.findMany({
-        select: {
-          userId: true,
-          session_state: true,
-          provider: true,
-        }
-      }),
-      prisma.session.findMany(),
-      prisma.verificationToken.findMany(),
-      prisma.authenticator.findMany(),
-    ])
-    return Response.json({
-      users,
-      accounts,
-      sessions,
-      tokens,
-      authenticators,
-    })
-  } catch (error) {
-    return Response.json({ error }, { status: 500 })
-  }
-})
-
-
 export const createDummyEntries = withAuth(async (req) => {
+
+  if (process.env.NODE_ENV === 'production')
+    return NextResponse.json({ message: 'Not allowed' }, { status: 403 })
+
   const userId = req.auth.user.id
   await prisma.entry.deleteMany({
     where: { userId }
@@ -246,12 +200,4 @@ export const createDummyEntries = withAuth(async (req) => {
   })
 
   return NextResponse.json(result)
-})
-
-export const deleteAllEntries = withAuth(async (req) => {
-  const userId = req.auth.user.id
-  const result = await prisma.entry.deleteMany({
-    where: { userId }
-  })
-  return NextResponse.json({ message: 'Data delete successfully!', result })
 })
