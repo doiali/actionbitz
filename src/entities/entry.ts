@@ -39,6 +39,8 @@ export type EntryParams = {
   order?: 'asc' | 'desc'
 }
 
+const LIMIT = 30
+
 export const getEntrySearchParams = (params: EntryParams) => {
   const searchParams = new URLSearchParams()
   if (params.from) searchParams.set('from', serializeDate(params.from))
@@ -81,8 +83,6 @@ export const parseEntry: (e: EntryJson) => EntryData = (entry: EntryJson) => {
     updatedAt: parseDateTimeSafe(entry.updatedAt),
   }
 }
-
-const LIMIT = 25
 
 export const useEntryList = (tab: 'past' | 'now' | 'future' = 'now') => {
   const params = getParamsByTab(tab)

@@ -9,7 +9,7 @@ import { useDateTabContext } from './(app)/layout'
 export default function EntryPage() {
   const tab = useDateTabContext()
   return (
-    <div className="flex flex-col py-2">
+    <div className="flex flex-col py-2 pb-12">
       <EntryReport tab={tab} />
       {tab === 'now' && <EntryAddButton />}
       <EntryList type={tab} />

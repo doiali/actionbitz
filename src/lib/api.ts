@@ -30,21 +30,26 @@ export const getEntryReport = withAuth(async (req) => {
 
   const sql = Prisma.sql`
     SELECT 
-      COUNT(*) AS count,
-      SUM(CASE WHEN completed = true THEN 1 ELSE 0 END) AS completed,
-      COUNT(DISTINCT "date") AS days
+      COUNT(*) AS "count"
+      ,SUM(CASE WHEN completed = true THEN 1 ELSE 0 END) AS "completed"
+      ,COUNT(DISTINCT "date") AS "days"
+      ,COUNT(DISTINCT CASE WHEN completed = true THEN "date" END) AS "daysActive"
+      ,MAX("date") - MIN("date") as "totalDays"
     FROM "Entry"
     WHERE "userId" = ${userId}
     AND ${from ? Prisma.sql`"date" >= ${new Date(from)}::date` : Prisma.sql`1=1`}
     AND ${to ? Prisma.sql`"date" < ${new Date(to)}::date` : Prisma.sql`1=1`}
   `
-
   const result = await prisma.$queryRaw(sql) as EntryReport[]
-  const { count, completed, days } = result[0]
+  const { count, completed, days, totalDays, daysActive } = result[0]
 
   return NextResponse.json({
-    count: Number(count), completed: Number(completed), days: Number(days)
-  })
+    count: Number(count),
+    completed: Number(completed),
+    days: Number(days),
+    totalDays: Number(totalDays),
+    daysActive: Number(daysActive)
+  } satisfies EntryReport)
 })
 
 export const getEntries = withAuth(async (req) => {
@@ -80,8 +85,8 @@ export const getEntries = withAuth(async (req) => {
       take: limit,
       skip: offset,
       orderBy: order === 'asc'
-        ? [{ date: 'asc' }, { createdAt: 'asc' }]
-        : [{ date: 'desc' }, { createdAt: 'desc' }]
+        ? [{ date: 'asc' }, { id: 'asc' }]
+        : [{ date: 'desc' }, { id: 'desc' }]
     })).map((entry) => ({ ...entry, id: Number(entry.id) }))
   }
 

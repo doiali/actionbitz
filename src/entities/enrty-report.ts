@@ -7,6 +7,8 @@ export type EntryReport = {
   count: number,
   completed: number,
   days: number,
+  totalDays: number,
+  daysActive: number,
 }
 
 export type EntryReportParams = {
