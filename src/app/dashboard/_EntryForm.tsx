@@ -16,7 +16,7 @@ export default function EntryForm({
   disabled?: boolean
   onCancel?: () => void
 }) {
-  const { title, datetime = new Date(), description } = state
+  const { title, date, description } = state
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     onSubmit()
@@ -45,7 +45,7 @@ export default function EntryForm({
         className="text-lg border-none py-0 focus-visible:ring-0"
       />
       <div className="flex justify-between items-center gap-2 mt-2">
-        <DateSelector value={datetime} onChange={(d) => onChange('datetime', d)} />
+        <DateSelector value={date} onChange={(d) => onChange('date', d)} />
         <div>
           {onCancel &&
             <Button variant="ghost" type="button" disabled={disabled} onClick={onCancel}>

@@ -3,11 +3,16 @@
 import { TabNav, TabNavLink, TabNavList } from '@/components/ui/tabnav'
 import Link from 'next/link'
 import { useSelectedLayoutSegment } from 'next/navigation'
+import { createContext, useContext } from 'react'
+
+const DateTabContext = createContext('now' as 'now' | 'past' | 'future')
+export const useDateTabContext = () => useContext(DateTabContext)
+const tabs = ['past', 'now', 'future'] as const
 
 export default function Layout({ children }: { children: React.ReactNode }) {
 
   const segment = useSelectedLayoutSegment()
-  const activeSegment = segment || 'now'
+  const activeSegment = tabs.find(x => x === segment) || 'now'
 
   return (
     <div className="w-full max-w-3xl mx-auto sm:px-2">
@@ -31,7 +36,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </TabNavList>
       </TabNav>
       <div>
-        {children}
+        <DateTabContext.Provider value={activeSegment}>
+          {children}
+        </DateTabContext.Provider>
       </div>
     </div>
   )

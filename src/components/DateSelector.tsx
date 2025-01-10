@@ -41,14 +41,20 @@ export function DateSelector({ value, onChange }: {
           </Button>
         </PopoverTrigger>
         <PopoverContent align="start">
-          <DateItem onClick={() => { onChange(new Date()); setOpen(false) }}>
+          <DateItem onClick={() => { onChange(startOfToday()); setOpen(false) }}>
             Today
           </DateItem>
-          <DateItem onClick={() => { onChange(addDays(new Date(), 1)); setOpen(false) }}>
+          <DateItem onClick={() => { onChange(addDays(startOfToday(), 1)); setOpen(false) }}>
             Tomorrow
           </DateItem>
-          <DateItem onClick={() => { onChange(addDays(new Date(), 7)); setOpen(false) }}>
+          <DateItem onClick={() => { onChange(addDays(startOfToday(), 7)); setOpen(false) }}>
             Next week
+          </DateItem>
+          <DateItem onClick={() => { onChange(addDays(startOfToday(), 30)); setOpen(false) }}>
+            Next month
+          </DateItem>
+          <DateItem onClick={() => { onChange(addDays(startOfToday(), 365)); setOpen(false) }}>
+            Next year
           </DateItem>
           <Popover>
             <PopoverTrigger asChild>

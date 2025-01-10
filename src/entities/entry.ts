@@ -1,10 +1,12 @@
 import apiClient from '@/utils/apiClient'
 import { SerializedModel } from '@/utils/types'
-import { parseDateSafe } from '@/utils/utils'
+import { parseDate, parseDateTimeSafe, serializeDate, serializeDateTimeSafe } from '@/utils/utils'
 import { EntryType } from '@prisma/client'
 import { InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { createDraft, Draft, produce } from 'immer'
+import { isEqual, startOfToday, startOfTomorrow } from 'date-fns'
+import { EntryReport, getReportParamsByTab } from './enrty-report'
 
 export type ListAPI<T> = {
   count: number,
@@ -18,7 +20,8 @@ export type EntryCreate = {
   type?: EntryType
   description?: string | null
   completed: boolean
-  datetime: Date
+  date: Date
+  datetime?: Date | null
 }
 
 export type EntryData = EntryCreate & {
@@ -30,37 +33,69 @@ export type EntryData = EntryCreate & {
 
 export type EntryJson = SerializedModel<EntryData>
 
+export type EntryParams = {
+  from?: Date
+  to?: Date
+  order?: 'asc' | 'desc'
+}
+
+const LIMIT = 30
+
+export const getEntrySearchParams = (params: EntryParams) => {
+  const searchParams = new URLSearchParams()
+  if (params.from) searchParams.set('from', serializeDate(params.from))
+  if (params.to) searchParams.set('to', serializeDate(params.to))
+  if (params.order) searchParams.set('order', params.order)
+  return searchParams
+}
+
+export const getParamsByTab: (tab?: 'now' | 'past' | 'future') => EntryParams = (tab = 'now') => {
+  if (tab === 'now') return { from: startOfToday(), to: startOfTomorrow(), order: 'desc' }
+  if (tab === 'past') return { to: startOfToday(), order: 'desc' }
+  if (tab === 'future') return { from: startOfTomorrow(), order: 'asc' }
+  return {}
+}
+
+export const getEntryTab: (entryDate: Date) => 'past' | 'now' | 'future' = (entryDate) => {
+  const today = startOfToday()
+  const tomorrow = startOfTomorrow()
+
+  if (entryDate < today) return 'past'
+  if (entryDate >= today && entryDate < tomorrow) return 'now'
+  return 'future'
+}
+
 export const getInitialEntry: () => EntryCreate = () => ({
   title: '',
   type: 'TODO',
   description: '',
   completed: false,
-  datetime: new Date(),
+  datetime: null,
+  date: startOfToday(),
 })
 
-export const deserializeEntry: (e: EntryJson) => EntryData = (entry: EntryJson) => {
+export const parseEntry: (e: EntryJson) => EntryData = (entry: EntryJson) => {
   return {
     ...entry,
-    datetime: new Date(entry.datetime),
-    createdAt: parseDateSafe(entry.createdAt),
-    updatedAt: parseDateSafe(entry.updatedAt),
+    date: parseDate(entry.date),
+    datetime: parseDateTimeSafe(entry.datetime),
+    createdAt: parseDateTimeSafe(entry.createdAt),
+    updatedAt: parseDateTimeSafe(entry.updatedAt),
   }
 }
 
-const LIMIT = 25
-
-export const useEntryList = (type: 'past' | 'now' | 'future' = 'now') => {
-  let path = 'entry/now'
-  if (type === 'past') path = 'entry/past'
-  if (type === 'future') path = 'entry/future'
-
+export const useEntryList = (tab: 'past' | 'now' | 'future' = 'now') => {
+  const params = getParamsByTab(tab)
   const result = useInfiniteQuery<ListAPI<EntryData>>({
-    queryKey: ['entry', type],
+    queryKey: ['entry', params],
     queryFn: ({ pageParam }) => {
       const { limit, offset } = pageParam as { limit: number, offset: number }
-      return apiClient.get<ListAPI<EntryJson>>(`${path}?limit=${limit}&offset=${offset}`).json()
+      const searchParams = getEntrySearchParams(params)
+      searchParams.set('limit', String(limit))
+      searchParams.set('offset', String(offset))
+      return apiClient.get<ListAPI<EntryJson>>(`entry?${searchParams}`).json()
         .then(({ data, ...rest }) => ({
-          data: data.map(deserializeEntry),
+          data: data.map(parseEntry),
           ...rest
         }))
     },
@@ -83,23 +118,32 @@ export const useEntryList = (type: 'past' | 'now' | 'future' = 'now') => {
 export const useEntryCreate = ({ onSuccess }: { onSuccess?: (data: EntryData) => void } = {}) => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ title, description, datetime, type }: EntryCreate) => (
+    mutationFn: ({ title, description, datetime, type, date }: EntryCreate) => (
       apiClient.post<EntryJson>('entry', {
         json: {
           title,
           description: description || null,
           type: type || 'TODO',
-          datetime: datetime.toISOString(),
+          date: serializeDate(date),
+          datetime: serializeDateTimeSafe(datetime),
           completed: false,
         } satisfies Omit<EntryJson, 'id'>
-      }).json().then(d => deserializeEntry(d))
+      }).json().then(d => parseEntry(d))
     ),
     onSuccess: (data) => {
+      const tab = getEntryTab(data.date)
+      queryClient.setQueryData<EntryReport>(
+        ['entry/report', getReportParamsByTab(tab)],
+        (prev) => (prev ? {
+          ...prev,
+          count: prev.count + 1,
+        } : undefined)
+      )
       queryClient.invalidateQueries({
-        queryKey: ['entry', 'now'],
+        queryKey: ['entry'],
       })
       queryClient.invalidateQueries({
-        queryKey: ['entry', 'future'],
+        queryKey: ['entry/report'],
       })
       onSuccess?.(data)
     },
@@ -110,27 +154,41 @@ export const useEntryUpdate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({
-      id, title, description, completed, type, datetime
-    }: EntryCreate & { id: number }) => (
+      id, title, description, completed, type, datetime, date
+    }: EntryCreate & { id: number, prev?: EntryData }) => (
       apiClient.put<EntryJson>(`entry/${id}`, {
         json: {
           title,
           description: description || null,
           completed,
           type,
-          datetime: datetime.toISOString(),
+          date: serializeDate(date),
+          datetime: serializeDateTimeSafe(datetime),
         } satisfies Omit<EntryJson, 'id'>
-      }).json().then(d => deserializeEntry(d))
+      }).json().then(d => parseEntry(d))
     ),
-    onSuccess: (data) => {
+    onSuccess: (data, { prev }) => {
       queryClient.setQueriesData(
         { queryKey: ['entry'] },
         (prev?: InfiniteData<ListAPI<EntryData>>) => (
           getUpdatedListonMutation(data, prev)
         )
       )
+      if (prev && isEqual(data.date, prev.date) && data.completed !== prev.completed) {
+        const tab = getEntryTab(data.date)
+        queryClient.setQueriesData<EntryReport>(
+          { queryKey: ['entry/report', getReportParamsByTab(tab)] },
+          (prev) => (prev ? {
+            ...prev,
+            completed: prev.completed + (data.completed ? 1 : -1),
+          } : undefined)
+        )
+      }
       queryClient.invalidateQueries({
         queryKey: ['entry'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['entry/report'],
       })
       onSuccess?.(data)
     },
@@ -140,18 +198,29 @@ export const useEntryUpdate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
 export const useEntryDelete = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: number) => (
-      apiClient.delete<null>(`entry/${id}`).json()
+    mutationFn: (entry: EntryData) => (
+      apiClient.delete<null>(`entry/${entry.id}`).json()
     ),
-    onSuccess: (data, id) => {
+    onSuccess: (data, prevEntry) => {
+      const tab = getEntryTab(prevEntry.date)
+      queryClient.setQueriesData<EntryReport>(
+        { queryKey: ['entry/report', getReportParamsByTab(tab)] },
+        (prev) => (prev ? {
+          ...prev,
+          count: prev.count - 1,
+        } : undefined)
+      )
       queryClient.setQueriesData(
         { queryKey: ['entry'] },
         (prev?: InfiniteData<ListAPI<EntryData>>) => (
-          getUpdatedListonDeleteMutation(id, prev)
+          getUpdatedListonDeleteMutation(prevEntry.id, prev)
         )
       )
       queryClient.invalidateQueries({
         queryKey: ['entry'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['entry/report'],
       })
       onSuccess?.()
     },

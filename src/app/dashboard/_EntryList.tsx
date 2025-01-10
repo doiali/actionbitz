@@ -11,6 +11,21 @@ import { format } from 'date-fns'
 import { CheckboxTodo } from '@/components/ui/checkbox-todo'
 import { Skeleton } from '@/components/ui/skeleton'
 
+const noData = {
+  past: {
+    title: 'No history yet!',
+    body: 'You\'ll have a journal of every action bit here!'
+  },
+  now: {
+    title: 'Nothing yet!',
+    body: 'What will get done today?'
+  },
+  future: {
+    title: 'No actions planned for future',
+    body: 'Wanna plan or postpone something?'
+  },
+}
+
 export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' | 'future' }) {
   const query = useEntryList(type)
   const {
@@ -23,7 +38,7 @@ export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' |
     let lastDate = ''
 
     allData.forEach((entry) => {
-      const entryDate = format(entry.datetime, 'MMMM d, yyyy')
+      const entryDate = format(entry.date, 'MMMM d, yyyy')
       if (entryDate !== lastDate && type !== 'now') {
         elements.push(
           <li key={entryDate} className="pt-6 ps-4 pb-1 text-sm font-bold text-muted-foreground">
@@ -49,7 +64,10 @@ export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' |
       )}
       {isError && <li className="py-2 text-center text-destructive">Something went wrong!</li>}
       {isSuccess && !allData?.length && (
-        <li className="text-center py-2">No Data</li>
+        <li className="flex flex-col gap-4 text-center py-12">
+          <span className="font-bold text-xl">{noData[type].title}</span>
+          <span className="text-muted-foreground">{noData[type].body}</span>
+        </li>
       )}
       {renderEntries()}
       <li className="flex justify-center mt-2">
@@ -84,6 +102,7 @@ const EntryItem = ({ entry }: {
             onClick={() => mutation.mutate({
               ...entry,
               completed: !entry.completed,
+              prev: entry,
             })}
             disabled={mutation.isPending}
           />
@@ -117,7 +136,7 @@ const EntryMenu = ({ entry }: { entry: EntryData }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => mutation.mutate(Number(entry.id))}>
+        <DropdownMenuItem onClick={() => mutation.mutate(entry)}>
           Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -146,7 +165,7 @@ const EntryEditForm = ({ entry, onClose }: {
   }
 
   const onSubmit = () => {
-    mutation.mutate(state)
+    mutation.mutate({ ...state, prev: entry })
   }
 
   return (
