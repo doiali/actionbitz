@@ -84,6 +84,7 @@ const EntryItem = ({ entry }: {
             onClick={() => mutation.mutate({
               ...entry,
               completed: !entry.completed,
+              prev: entry,
             })}
             disabled={mutation.isPending}
           />
@@ -117,7 +118,7 @@ const EntryMenu = ({ entry }: { entry: EntryData }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => mutation.mutate(Number(entry.id))}>
+        <DropdownMenuItem onClick={() => mutation.mutate(entry)}>
           Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -146,7 +147,7 @@ const EntryEditForm = ({ entry, onClose }: {
   }
 
   const onSubmit = () => {
-    mutation.mutate(state)
+    mutation.mutate({ ...state, prev: entry })
   }
 
   return (

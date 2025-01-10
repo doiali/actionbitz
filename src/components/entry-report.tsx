@@ -24,10 +24,6 @@ const EntryReport: React.FC<{ tab?: 'past' | 'now' | 'future' }> = ({ tab = 'now
   )
 }
 
-const chartData = [
-  { name: "report", value: 200, fill: "var(--color-report)" },
-]
-
 const chartConfig = {
   value: {
     label: "Value",
@@ -50,6 +46,9 @@ const EntryChart: React.FC<{
   value?: number, label?: string, labelSecondary?: string,
 }> = ({ value = 0, label, labelSecondary }) => {
   const endAngle = value * 360 + 90
+  const chartData = [
+    { name: "report", value: endAngle, fill: "var(--color-report)" },
+  ]
   return (
     <ChartContainer
       config={chartConfig}
@@ -61,7 +60,6 @@ const EntryChart: React.FC<{
         endAngle={endAngle}
         innerRadius={15}
         outerRadius={30}
-
       >
         <PolarGrid
           gridType="circle"

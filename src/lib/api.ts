@@ -28,20 +28,18 @@ export const getEntryReport = withAuth(async (req) => {
   const from = searchParams.get('from')
   const to = searchParams.get('to')
 
-  const whereClause = Prisma.sql`
-    WHERE "userId" = ${userId}
-    AND ${from ? Prisma.sql`"date" >= ${parseDateServer(from)}` : Prisma.sql`1=1`}
-    AND ${to ? Prisma.sql`"date" < ${parseDateServer(to)}` : Prisma.sql`1=1`}
-  `
-
-  const result = await prisma.$queryRaw(Prisma.sql`
+  const sql = Prisma.sql`
     SELECT 
       COUNT(*) AS count,
       SUM(CASE WHEN completed = true THEN 1 ELSE 0 END) AS completed,
       COUNT(DISTINCT "date") AS days
     FROM "Entry"
-    ${whereClause}
-  `) as EntryReport[]
+    WHERE "userId" = ${userId}
+    AND ${from ? Prisma.sql`"date" >= ${new Date(from)}::date` : Prisma.sql`1=1`}
+    AND ${to ? Prisma.sql`"date" < ${new Date(to)}::date` : Prisma.sql`1=1`}
+  `
+
+  const result = await prisma.$queryRaw(sql) as EntryReport[]
   const { count, completed, days } = result[0]
 
   return NextResponse.json({

@@ -5,7 +5,8 @@ import { EntryType } from '@prisma/client'
 import { InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { createDraft, Draft, produce } from 'immer'
-import { startOfToday, startOfTomorrow } from 'date-fns'
+import { isEqual, startOfToday, startOfTomorrow } from 'date-fns'
+import { EntryReport, getReportParamsByTab } from './enrty-report'
 
 export type ListAPI<T> = {
   count: number,
@@ -51,6 +52,15 @@ export const getParamsByTab: (tab?: 'now' | 'past' | 'future') => EntryParams = 
   if (tab === 'past') return { to: startOfToday(), order: 'desc' }
   if (tab === 'future') return { from: startOfTomorrow(), order: 'asc' }
   return {}
+}
+
+export const getEntryTab: (entryDate: Date) => 'past' | 'now' | 'future' = (entryDate) => {
+  const today = startOfToday()
+  const tomorrow = startOfTomorrow()
+
+  if (entryDate < today) return 'past'
+  if (entryDate >= today && entryDate < tomorrow) return 'now'
+  return 'future'
 }
 
 export const getInitialEntry: () => EntryCreate = () => ({
@@ -121,8 +131,19 @@ export const useEntryCreate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
       }).json().then(d => parseEntry(d))
     ),
     onSuccess: (data) => {
+      const tab = getEntryTab(data.date)
+      queryClient.setQueryData<EntryReport>(
+        ['entry/report', getReportParamsByTab(tab)],
+        (prev) => (prev ? {
+          ...prev,
+          count: prev.count + 1,
+        } : undefined)
+      )
       queryClient.invalidateQueries({
         queryKey: ['entry'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['entry/report'],
       })
       onSuccess?.(data)
     },
@@ -134,7 +155,7 @@ export const useEntryUpdate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
   return useMutation({
     mutationFn: ({
       id, title, description, completed, type, datetime, date
-    }: EntryCreate & { id: number }) => (
+    }: EntryCreate & { id: number, prev?: EntryData }) => (
       apiClient.put<EntryJson>(`entry/${id}`, {
         json: {
           title,
@@ -146,15 +167,28 @@ export const useEntryUpdate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
         } satisfies Omit<EntryJson, 'id'>
       }).json().then(d => parseEntry(d))
     ),
-    onSuccess: (data) => {
+    onSuccess: (data, { prev }) => {
       queryClient.setQueriesData(
         { queryKey: ['entry'] },
         (prev?: InfiniteData<ListAPI<EntryData>>) => (
           getUpdatedListonMutation(data, prev)
         )
       )
+      if (prev && isEqual(data.date, prev.date) && data.completed !== prev.completed) {
+        const tab = getEntryTab(data.date)
+        queryClient.setQueriesData<EntryReport>(
+          { queryKey: ['entry/report', getReportParamsByTab(tab)] },
+          (prev) => (prev ? {
+            ...prev,
+            completed: prev.completed + (data.completed ? 1 : -1),
+          } : undefined)
+        )
+      }
       queryClient.invalidateQueries({
         queryKey: ['entry'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['entry/report'],
       })
       onSuccess?.(data)
     },
@@ -164,18 +198,29 @@ export const useEntryUpdate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
 export const useEntryDelete = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: number) => (
-      apiClient.delete<null>(`entry/${id}`).json()
+    mutationFn: (entry: EntryData) => (
+      apiClient.delete<null>(`entry/${entry.id}`).json()
     ),
-    onSuccess: (data, id) => {
+    onSuccess: (data, prevEntry) => {
+      const tab = getEntryTab(prevEntry.date)
+      queryClient.setQueriesData<EntryReport>(
+        { queryKey: ['entry/report', getReportParamsByTab(tab)] },
+        (prev) => (prev ? {
+          ...prev,
+          count: prev.count - 1,
+        } : undefined)
+      )
       queryClient.setQueriesData(
         { queryKey: ['entry'] },
         (prev?: InfiniteData<ListAPI<EntryData>>) => (
-          getUpdatedListonDeleteMutation(id, prev)
+          getUpdatedListonDeleteMutation(prevEntry.id, prev)
         )
       )
       queryClient.invalidateQueries({
         queryKey: ['entry'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['entry/report'],
       })
       onSuccess?.()
     },
