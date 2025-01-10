@@ -1,8 +1,8 @@
 'use client'
 
 import { AppSidebar } from '@/components/app-sidebar'
-import ProtectedPage from '@/components/ProtectedPage'
-import ThemeToggle from '@/components/ThemeToggle'
+import ProtectedPage from '@/components/protected-page'
+import ThemeToggle from '@/components/theme-toggle'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 
 export default function Layout({ children }: { children: React.ReactNode }) {

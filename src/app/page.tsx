@@ -1,4 +1,4 @@
-import UserButton from '@/components/UserButton';
+import UserButton from '@/components/user-button';
 import React from "react";
 
 export default function Home() {

@@ -1,6 +1,6 @@
 'use client'
 
-import { DateSelector } from '@/components/DateSelector'
+import { DateSelector } from '@/components/date-selector'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'

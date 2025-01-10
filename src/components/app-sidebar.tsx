@@ -6,7 +6,7 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar"
-import { UserMenu } from './UserMenu'
+import { UserMenu } from './user-menu'
 import { LifeBuoy, Send } from 'lucide-react'
 import { NavSecondary } from './nav-secondary'
 

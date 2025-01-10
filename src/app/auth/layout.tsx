@@ -1,4 +1,4 @@
-import AuthPageController from '@/components/AuthPageController'
+import AuthPageController from '@/components/auth-controller'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
