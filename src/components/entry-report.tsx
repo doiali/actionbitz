@@ -8,7 +8,7 @@ import {
   RadialBarChart,
 } from "recharts"
 import { ChartConfig, ChartContainer } from "@/components/ui/chart"
-import { useEntryReport } from '@/entities/entry'
+import { useEntryReport } from '@/entities/enrty-report'
 
 const EntryReport: React.FC<{ tab?: 'past' | 'now' | 'future' }> = ({ tab = 'now' }) => {
   const { data } = useEntryReport(tab)

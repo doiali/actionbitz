@@ -3,9 +3,11 @@
 import { withAuth } from '@/auth'
 import { prisma } from './prisma'
 import { NextRequest, NextResponse } from 'next/server'
-import { EntryCreate, EntryData, EntryJson, EntryReport } from '@/entities/entry'
-import { endOfToday, startOfToday } from 'date-fns'
+import { EntryCreate, EntryData, EntryJson } from '@/entities/entry'
 import { faker } from '@faker-js/faker'
+import { EntryReport } from '@/entities/enrty-report'
+import { Prisma } from '@prisma/client'
+import { parseDateServer } from '@/utils/utils'
 
 
 const DEFAULT_LIMIT = 10
@@ -22,15 +24,24 @@ const notFoundResponse = () => NextResponse.json({ message: "Not Found" }, { sta
 
 export const getEntryReport = withAuth(async (req) => {
   const userId = req.auth.user.id
+  const searchParams = req.nextUrl.searchParams
+  const from = searchParams.get('from')
+  const to = searchParams.get('to')
 
-  const result = await prisma.$queryRaw`
+  const whereClause = Prisma.sql`
+    WHERE "userId" = ${userId}
+    AND ${from ? Prisma.sql`"date" >= ${parseDateServer(from)}` : Prisma.sql`1=1`}
+    AND ${to ? Prisma.sql`"date" < ${parseDateServer(to)}` : Prisma.sql`1=1`}
+  `
+
+  const result = await prisma.$queryRaw(Prisma.sql`
     SELECT 
       COUNT(*) AS count,
       SUM(CASE WHEN completed = true THEN 1 ELSE 0 END) AS completed,
-      COUNT(DISTINCT DATE(datetime)) AS days
+      COUNT(DISTINCT "date") AS days
     FROM "Entry"
-    WHERE "userId" = ${userId}
-  `as EntryReport[]
+    ${whereClause}
+  `) as EntryReport[]
   const { count, completed, days } = result[0]
 
   return NextResponse.json({
@@ -38,12 +49,22 @@ export const getEntryReport = withAuth(async (req) => {
   })
 })
 
-export const getNowEntries = withAuth(async (req) => {
+export const getEntries = withAuth(async (req) => {
   const userId = req.auth.user.id
   const { limit, offset } = getPaginationParams(req)
+  const searchParams = req.nextUrl.searchParams
+  const from = searchParams.get('from')
+  const to = searchParams.get('to')
+  const order = searchParams.get('order') || 'desc'
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let dateFilter: any = {}
+  if (from) dateFilter.gte = parseDateServer(from)
+  if (to) dateFilter.lt = parseDateServer(to)
+  if (!from && !to) dateFilter = undefined
 
   const count = await prisma.entry.count({
-    where: { userId, datetime: { gte: startOfToday(), lt: endOfToday() } }
+    where: { userId, date: dateFilter }
   })
 
   let data: EntryData[] = []
@@ -51,82 +72,23 @@ export const getNowEntries = withAuth(async (req) => {
   if (offset < count) {
     data = (await prisma.entry.findMany({
       select: {
-        id: true, title: true, description: true,
+        id: true, title: true, description: true, date: true,
         datetime: true, completed: true, type: true,
       },
       where: {
         userId: userId,
-        datetime: { gte: startOfToday(), lt: endOfToday() },
+        date: dateFilter,
       },
       take: limit,
       skip: offset,
-      orderBy: [{ datetime: 'desc', }, { createdAt: 'desc', },]
+      orderBy: order === 'asc'
+        ? [{ date: 'asc' }, { updatedAt: 'asc' }]
+        : [{ date: 'desc' }, { updatedAt: 'desc' }]
     })).map((entry) => ({ ...entry, id: Number(entry.id) }))
   }
 
   return NextResponse.json({ data, count, limit, offset })
 })
-
-
-export const getPastEntries = withAuth(async (req) => {
-  const userId = req.auth.user.id
-  const { limit, offset } = getPaginationParams(req)
-
-  const count = await prisma.entry.count({
-    where: { userId, datetime: { lt: startOfToday() } }
-  })
-
-  let data: EntryData[] = []
-
-  if (offset < count) {
-    data = (await prisma.entry.findMany({
-      select: {
-        id: true, title: true, description: true,
-        datetime: true, completed: true, type: true,
-      },
-      where: {
-        userId: userId,
-        datetime: { lt: startOfToday() },
-      },
-      take: limit,
-      skip: offset,
-      orderBy: [{ datetime: 'desc', }, { createdAt: 'desc', },]
-    })).map((entry) => ({ ...entry, id: Number(entry.id) }))
-  }
-
-  return NextResponse.json({ data, count, limit, offset })
-})
-
-
-export const getFutureEntries = withAuth(async (req) => {
-  const userId = req.auth.user.id
-  const { limit, offset } = getPaginationParams(req)
-
-  const count = await prisma.entry.count({
-    where: { userId, datetime: { gte: endOfToday() } }
-  })
-
-  let data: EntryData[] = []
-
-  if (offset < count) {
-    data = (await prisma.entry.findMany({
-      select: {
-        id: true, title: true, description: true,
-        datetime: true, completed: true, type: true,
-      },
-      where: {
-        userId: userId,
-        datetime: { gte: endOfToday() },
-      },
-      take: limit,
-      skip: offset,
-      orderBy: [{ datetime: 'asc', }, { createdAt: 'asc', },]
-    })).map((entry) => ({ ...entry, id: Number(entry.id) }))
-  }
-
-  return NextResponse.json({ data, count, limit, offset })
-})
-
 
 export const getEntry = withAuth<{ id: string }>(async (req, { params }) => {
   const userId = req?.auth?.user?.id
@@ -148,13 +110,15 @@ export const getEntry = withAuth<{ id: string }>(async (req, { params }) => {
 
 export const createEntry = withAuth(async (req) => {
   const userId = req.auth.user.id
-  const { title, description, datetime, type } = await req.json() as EntryCreate
+  const { title, description, datetime, date, type } = await req.json() as EntryJson
+  console.log(date, parseDateServer(date))
   const entry = await prisma.entry.create({
     data: {
       title,
       description,
       type,
       datetime,
+      date: parseDateServer(date),
       userId,
     }
   })
@@ -167,7 +131,7 @@ export const createEntry = withAuth(async (req) => {
 export const updateEntry = withAuth<{ id: string }>(async (req, { params }) => {
   const userId = req?.auth?.user?.id
   const { id } = await params
-  const { title, description, datetime, type, completed } = await req.json() as EntryJson
+  const { title, description, datetime, type, completed, date } = await req.json() as EntryJson
   const entry = await prisma.entry.findFirst({
     where: { userId, id: Number(id) },
   })
@@ -180,6 +144,7 @@ export const updateEntry = withAuth<{ id: string }>(async (req, { params }) => {
       type,
       description,
       datetime,
+      date: parseDateServer(date),
       completed,
     }
   })
@@ -213,7 +178,7 @@ export const getAllUserEntries = withAuth(async (req) => {
   const userId = req.auth.user.id
   const entries: EntryData[] = (await prisma.entry.findMany({
     select: {
-      id: true, title: true, description: true,
+      id: true, title: true, description: true, date: true,
       datetime: true, completed: true, type: true,
     },
     where: { userId: userId, },
@@ -269,7 +234,7 @@ export const createDummyEntries = withAuth(async (req) => {
     title: faker.lorem.sentence({ min: 3, max: 10 }),
     description: faker.lorem.paragraph({ min: 0, max: 3 }),
     completed: faker.datatype.boolean(),
-    datetime: faker.date.between({ from: '2022-06-01', to: '2026-06-01' }),
+    date: faker.date.between({ from: '2024-06-01', to: '2025-06-01' }),
     userId: userId,
   } satisfies EntryCreate & { userId: string }))
 

@@ -23,7 +23,7 @@ export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' |
     let lastDate = ''
 
     allData.forEach((entry) => {
-      const entryDate = format(entry.datetime, 'MMMM d, yyyy')
+      const entryDate = format(entry.date, 'MMMM d, yyyy')
       if (entryDate !== lastDate && type !== 'now') {
         elements.push(
           <li key={entryDate} className="pt-6 ps-4 pb-1 text-sm font-bold text-muted-foreground">
