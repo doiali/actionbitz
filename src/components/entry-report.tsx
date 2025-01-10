@@ -66,7 +66,7 @@ const chartConfig = {
   },
   report: {
     label: "Report",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--chart-3))",
   },
 } satisfies ChartConfig
 
