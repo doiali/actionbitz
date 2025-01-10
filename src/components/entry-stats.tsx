@@ -12,7 +12,7 @@ import { useEntryReport } from '@/entities/enrty-report'
 import { memo } from 'react'
 import { Card } from './ui/card'
 
-const EntryReport: React.FC<{ tab?: 'past' | 'now' | 'future' }> = ({ tab = 'now' }) => {
+const EntryStats: React.FC<{ tab?: 'past' | 'now' | 'future' }> = ({ tab = 'now' }) => {
   const { data } = useEntryReport(tab)
   const { count = 0, completed = 0, days = 0, daysActive = 0, totalDays = 0 } = data || {}
   const r = count ? completed / count : 0
@@ -145,4 +145,4 @@ const EntryChart = memo(({ value = 0, label, labelSecondary, size = 30 }: {
 })
 EntryChart.displayName = "EntryChart"
 
-export default EntryReport
+export default EntryStats

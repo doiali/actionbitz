@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button'
 import React, { useState } from "react"
 import { EntryCreate, getInitialEntry, useEntryCreate } from '@/entities/entry'
-import EntryForm from './_EntryForm'
+import EntryForm from './entry-form'
 import { Plus } from 'lucide-react'
 
 export default function EntryAddButton() {

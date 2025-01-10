@@ -1,1 +1,1 @@
-export { default } from '../../_EntryPage'
+export { default } from '@/components/entry-page'
