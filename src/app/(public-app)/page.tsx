@@ -12,7 +12,7 @@ export default function Home() {
           <Badge className="mt-6 border-primary rounded-full" variant="outline">Beta</Badge>
         </span>
         <p className="mb-4 text-xl">
-          You want to get things done? So just do it!
+          Want to get things done? just do it!
         </p>
 
         <StartButton />
