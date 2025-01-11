@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label"
 import { FormEvent, useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useSearchParams } from 'next/navigation'
+import { FaGoogle, FaGithub } from 'react-icons/fa6'
 
 export function LoginForm({
   className,
@@ -49,13 +50,13 @@ export function LoginForm({
                 <Button type="button" variant="outline" className="w-full"
                   onClick={() => signIn('google')}
                 >
-                  Continue with Google
+                  <FaGoogle /> Continue with Google
                 </Button>
                 <Button
                   type="button" variant="outline" className="w-full"
                   onClick={() => signIn('github')}
                 >
-                  Continue with GitHub
+                  <FaGithub /> Continue with GitHub
                 </Button>
               </div>
               <p className="text-center">Or</p>
