@@ -8,13 +8,13 @@ import {
   RadialBarChart,
 } from "recharts"
 import { ChartConfig, ChartContainer } from "@/components/ui/chart"
-import { useEntryReport } from '@/entities/enrty-report'
+import { EntryReport, useEntryReport } from '@/entities/enrty-report'
 import { memo } from 'react'
 import { Card } from './ui/card'
 
 const EntryStats: React.FC<{ tab?: 'past' | 'now' | 'future' }> = ({ tab = 'now' }) => {
   const { data } = useEntryReport(tab)
-  const { count = 0, completed = 0, days = 0, daysActive = 0, totalDays = 0 } = data || {}
+  const { count = 0, completed = 0 } = data || {}
   const r = count ? completed / count : 0
   if (tab === 'now' || tab === 'future')
     return (
@@ -33,27 +33,35 @@ const EntryStats: React.FC<{ tab?: 'past' | 'now' | 'future' }> = ({ tab = 'now'
       <div className="flex justify-center max-sm:px-2">
         <Card className="flex flex-col gap-2 p-4 px-6">
           <h3 className="font-bold text-xl">Action report</h3>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex flex-col gap-2 text-muted-foreground">
-              <span>Last <Stat value={totalDays} /> days</span>
-              <span>active <Stat value={daysActive} /> of <Stat value={days} /> days</span>
-              <span className="flex gap-2 ">
-                <span>done: <Stat value={completed} /></span>
-                <span>missed: <Stat value={count - completed} /></span>
-              </span>
-            </div>
-            <div className="flex flex-row justify-center pb-0 h-[120px]">
-              <EntryChart key={tab} value={r} size={50}
-                label={`${Math.round(r * 100)}%`}
-                labelSecondary={`of ${count}`}
-              />
-            </div>
-          </div>
+          <EntryPastStats data={data} />
         </Card>
       </div>
     )
 
   return null
+}
+
+export const EntryPastStats: React.FC<{ data?: EntryReport }> = ({ data }) => {
+  const { count = 0, completed = 0, days = 0, daysActive = 0, totalDays = 0 } = data || {}
+  const r = count ? completed / count : 0
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-2 text-muted-foreground text-sm">
+        <span>Last <Stat value={totalDays} /> days</span>
+        <span>active <Stat value={daysActive} /> of <Stat value={days} /> days</span>
+        <span className="flex gap-2 ">
+          <span>done: <Stat value={completed} /></span>
+          <span>missed: <Stat value={count - completed} /></span>
+        </span>
+      </div>
+      <div className="flex flex-row justify-center pb-0 h-[110px]">
+        <EntryChart key="past" value={r} size={45}
+          label={`${Math.round(r * 100)}%`}
+          labelSecondary={`of ${count}`}
+        />
+      </div>
+    </div>
+  )
 }
 
 const Stat: React.FC<{ value: number }> = ({ value }) => {

@@ -36,8 +36,9 @@ const data = {
     },
     {
       title: "Reports",
-      url: "#",
+      url: "/dashboard/report",
       icon: ChartPie,
+      isActive: (segment: string | null) => segment === 'report',
     },
   ],
   navSecondary: [
