@@ -1,10 +1,17 @@
-'use client'
-
 import AppBrand from '@/components/app-brand'
 import { AppSidebar } from '@/components/app-sidebar'
 import ProtectedPage from '@/components/protected-page'
 import ThemeToggle from '@/components/theme-toggle'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'ActionBitz - Dashboard',
+  robots: {
+    follow: false,
+    index: false,
+  },
+}
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

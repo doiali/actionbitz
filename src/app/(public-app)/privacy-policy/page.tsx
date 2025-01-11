@@ -1,4 +1,9 @@
+import { Metadata } from 'next'
 import PrivacyPolicy from './privacy-policy.mdx';
+
+export const metadata: Metadata = {
+  title: 'ActionBitz - Privacy Policy',
+}
 
 export default function PrivacyPolicyPage() {
   return (
