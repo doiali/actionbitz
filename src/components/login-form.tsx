@@ -17,6 +17,8 @@ import { FormEvent, useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useSearchParams } from 'next/navigation'
 import { FaGoogle, FaGithub } from 'react-icons/fa6'
+import AppBrand from './app-brand'
+import Link from 'next/link'
 
 export function LoginForm({
   className,
@@ -31,7 +33,8 @@ export function LoginForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col items-center">
+          <Link className="italic text-4xl mb-2" href="/"><AppBrand /></Link>
           <CardTitle className="text-2xl text-center">Sign In</CardTitle>
         </CardHeader>
         <CardContent>
