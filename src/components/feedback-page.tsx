@@ -6,7 +6,7 @@ export default function FeedbackPage() {
       <div className="prose dark:prose-invert">
         <h1 className="text-3xl font-bold mb-8">We Value Your Feedback!</h1>
         <p>Email: <a href="mailto:support@actionbitz.com">support@actionbitz.com</a> </p>
-        <p>We’re always looking to make ActionBitz better. Got an idea or suggestion? Drop us a message and let us know how we can improve your experience. Your thoughts help shape the future of the app!</p>
+        <p>We’re always looking to make Actionbitz better. Got an idea or suggestion? Drop us a message and let us know how we can improve your experience. Your thoughts help shape the future of the app!</p>
       </div>
     </div>
   )

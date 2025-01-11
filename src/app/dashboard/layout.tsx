@@ -6,7 +6,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'ActionBitz - Dashboard',
+  title: 'Actionbitz - Dashboard',
   robots: {
     follow: false,
     index: false,

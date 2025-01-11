@@ -33,7 +33,7 @@ const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
             </li>
           </ul>
           <p>
-            &copy; {new Date().getFullYear()} ActionBitz. All rights reserved.
+            &copy; {new Date().getFullYear()} Actionbitz. All rights reserved.
           </p>
         </div>
       </footer>

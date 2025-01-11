@@ -21,36 +21,36 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "ActionBitz - Get Things Done, Bitz by Bitz",
+  title: "Actionbitz - Get Things Done, bitz by bitz",
   description:
-    "Take action and do what you gotta do. Track all your action bitz, bitz by bitz with ActionBitz. Level up 1% every single day!",
+    "Take action and do what you gotta do. Track all your action bitz, bitz by bitz with Actionbitz. Level up 1% every single day!",
   keywords: [
     "todo app",
     "task management",
-    "ActionBitz",
+    "Actionbitz",
     "productivity tools",
   ],
   openGraph: {
-    title: "ActionBitz - Get Things Done, Bit by Bit",
+    title: "Actionbitz - Get Things Done, Bit by Bit",
     description:
-      "Take action and do what you gotta do. Track all your action bitz, bitz by bitz with ActionBitz. Level up 1% every single day",
+      "Take action and do what you gotta do. Track all your action bitz, bitz by bitz with Actionbitz. Level up 1% every single day",
     url: "https://actionbitz.com",
-    siteName: "ActionBitz",
+    siteName: "Actionbitz",
     images: [
       {
         url: "https://actionbitz.com/actionbitz.png", // Replace with your actual image URL
         width: 1200,
         height: 630,
-        alt: "ActionBitz - Get Things Done, Bitz by Bitz",
+        alt: "Actionbitz - Get Things Done, bitz by bitz",
       },
     ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ActionBitz - Get Things Done, Bitz by Bitz",
+    title: "Actionbitz - Get Things Done, bitz by bitz",
     description:
-      "Take action and do what you gotta do. Track all your action bitz, bitz by bitz with ActionBitz. Level up 1% every single day!",
+      "Take action and do what you gotta do. Track all your action bitz, bitz by bitz with Actionbitz. Level up 1% every single day!",
     images: ["https://actionbitz.com/actionbitz.png"], // Replace with your actual image URL
   },
 }
