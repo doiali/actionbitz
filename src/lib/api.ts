@@ -4,8 +4,10 @@ import { withAuth } from '@/auth'
 import { prisma } from './prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { EntryCreate, EntryData, EntryJson } from '@/entities/entry'
-import { endOfTomorrow, startOfTomorrow, startOfYesterday } from 'date-fns'
 import { faker } from '@faker-js/faker'
+import { EntryReport } from '@/entities/enrty-report'
+import { Prisma } from '@prisma/client'
+import { parseDateServer } from '@/utils/utils'
 
 
 const DEFAULT_LIMIT = 10
@@ -20,13 +22,52 @@ const getPaginationParams = (req: NextRequest) => {
 
 const notFoundResponse = () => NextResponse.json({ message: "Not Found" }, { status: 404 })
 
+export const getEntryReport = withAuth(async (req) => {
+  const userId = req.auth.user.id
+  const searchParams = req.nextUrl.searchParams
+  const from = searchParams.get('from')
+  const to = searchParams.get('to')
 
-export const getNowEntries = withAuth(async (req) => {
+  const sql = Prisma.sql`
+    SELECT 
+      COUNT(*) AS "count"
+      ,SUM(CASE WHEN completed = true THEN 1 ELSE 0 END) AS "completed"
+      ,COUNT(DISTINCT "date") AS "days"
+      ,COUNT(DISTINCT CASE WHEN completed = true THEN "date" END) AS "daysActive"
+      ,MAX("date") - MIN("date") as "totalDays"
+    FROM "Entry"
+    WHERE "userId" = ${userId}
+    AND ${from ? Prisma.sql`"date" >= ${new Date(from)}::date` : Prisma.sql`1=1`}
+    AND ${to ? Prisma.sql`"date" < ${new Date(to)}::date` : Prisma.sql`1=1`}
+  `
+  const result = await prisma.$queryRaw(sql) as EntryReport[]
+  const { count, completed, days, totalDays, daysActive } = result[0]
+
+  return NextResponse.json({
+    count: Number(count),
+    completed: Number(completed),
+    days: Number(days),
+    totalDays: Number(totalDays),
+    daysActive: Number(daysActive)
+  } satisfies EntryReport)
+})
+
+export const getEntries = withAuth(async (req) => {
   const userId = req.auth.user.id
   const { limit, offset } = getPaginationParams(req)
+  const searchParams = req.nextUrl.searchParams
+  const from = searchParams.get('from')
+  const to = searchParams.get('to')
+  const order = searchParams.get('order') || 'desc'
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let dateFilter: any = {}
+  if (from) dateFilter.gte = parseDateServer(from)
+  if (to) dateFilter.lt = parseDateServer(to)
+  if (!from && !to) dateFilter = undefined
 
   const count = await prisma.entry.count({
-    where: { userId, datetime: { gt: startOfYesterday(), lt: endOfTomorrow() } }
+    where: { userId, date: dateFilter }
   })
 
   let data: EntryData[] = []
@@ -34,82 +75,23 @@ export const getNowEntries = withAuth(async (req) => {
   if (offset < count) {
     data = (await prisma.entry.findMany({
       select: {
-        id: true, title: true, description: true,
+        id: true, title: true, description: true, date: true,
         datetime: true, completed: true, type: true,
       },
       where: {
         userId: userId,
-        datetime: { gt: startOfYesterday(), lt: endOfTomorrow() },
+        date: dateFilter,
       },
       take: limit,
       skip: offset,
-      orderBy: [{ datetime: 'desc', }, { createdAt: 'desc', },]
+      orderBy: order === 'asc'
+        ? [{ date: 'asc' }, { id: 'asc' }]
+        : [{ date: 'desc' }, { id: 'desc' }]
     })).map((entry) => ({ ...entry, id: Number(entry.id) }))
   }
 
   return NextResponse.json({ data, count, limit, offset })
 })
-
-
-export const getPastEntries = withAuth(async (req) => {
-  const userId = req.auth.user.id
-  const { limit, offset } = getPaginationParams(req)
-
-  const count = await prisma.entry.count({
-    where: { userId, datetime: { lt: startOfYesterday() } }
-  })
-
-  let data: EntryData[] = []
-
-  if (offset < count) {
-    data = (await prisma.entry.findMany({
-      select: {
-        id: true, title: true, description: true,
-        datetime: true, completed: true, type: true,
-      },
-      where: {
-        userId: userId,
-        datetime: { lt: startOfYesterday() },
-      },
-      take: limit,
-      skip: offset,
-      orderBy: [{ datetime: 'desc', }, { createdAt: 'desc', },]
-    })).map((entry) => ({ ...entry, id: Number(entry.id) }))
-  }
-
-  return NextResponse.json({ data, count, limit, offset })
-})
-
-
-export const getFutureEntries = withAuth(async (req) => {
-  const userId = req.auth.user.id
-  const { limit, offset } = getPaginationParams(req)
-
-  const count = await prisma.entry.count({
-    where: { userId, datetime: { gt: startOfTomorrow() } }
-  })
-
-  let data: EntryData[] = []
-
-  if (offset < count) {
-    data = (await prisma.entry.findMany({
-      select: {
-        id: true, title: true, description: true,
-        datetime: true, completed: true, type: true,
-      },
-      where: {
-        userId: userId,
-        datetime: { gt: startOfTomorrow() },
-      },
-      take: limit,
-      skip: offset,
-      orderBy: [{ datetime: 'asc', }, { createdAt: 'asc', },]
-    })).map((entry) => ({ ...entry, id: Number(entry.id) }))
-  }
-
-  return NextResponse.json({ data, count, limit, offset })
-})
-
 
 export const getEntry = withAuth<{ id: string }>(async (req, { params }) => {
   const userId = req?.auth?.user?.id
@@ -131,13 +113,15 @@ export const getEntry = withAuth<{ id: string }>(async (req, { params }) => {
 
 export const createEntry = withAuth(async (req) => {
   const userId = req.auth.user.id
-  const { title, description, datetime, type } = await req.json() as EntryCreate
+  const { title, description, datetime, date, type } = await req.json() as EntryJson
+  console.log(date, parseDateServer(date))
   const entry = await prisma.entry.create({
     data: {
       title,
       description,
       type,
       datetime,
+      date: parseDateServer(date),
       userId,
     }
   })
@@ -150,7 +134,7 @@ export const createEntry = withAuth(async (req) => {
 export const updateEntry = withAuth<{ id: string }>(async (req, { params }) => {
   const userId = req?.auth?.user?.id
   const { id } = await params
-  const { title, description, datetime, type, completed } = await req.json() as EntryJson
+  const { title, description, datetime, type, completed, date } = await req.json() as EntryJson
   const entry = await prisma.entry.findFirst({
     where: { userId, id: Number(id) },
   })
@@ -163,6 +147,7 @@ export const updateEntry = withAuth<{ id: string }>(async (req, { params }) => {
       type,
       description,
       datetime,
+      date: parseDateServer(date),
       completed,
     }
   })
@@ -192,57 +177,11 @@ export const deleteEntry = withAuth<{ id: string }>(async (req, { params }) => {
 
 
 // Playground
-export const getAllUserEntries = withAuth(async (req) => {
-  const userId = req.auth.user.id
-  const entries: EntryData[] = (await prisma.entry.findMany({
-    select: {
-      id: true, title: true, description: true,
-      datetime: true, completed: true, type: true,
-    },
-    where: { userId: userId, },
-    orderBy: [{ datetime: 'desc', }, { createdAt: 'desc', },],
-    take: MAX_LIMIT,
-  })).map((entry) => ({ ...entry, id: Number(entry.id) }))
-
-  return NextResponse.json({ data: entries })
-})
-
-
-export const getAuthData = withAuth(async () => {
-  try {
-    const [
-      users,
-      accounts,
-      sessions,
-      tokens,
-      authenticators,
-    ] = await Promise.all([
-      prisma.user.findMany({ select: { id: true, email: true, name: true } }),
-      prisma.account.findMany({
-        select: {
-          userId: true,
-          session_state: true,
-          provider: true,
-        }
-      }),
-      prisma.session.findMany(),
-      prisma.verificationToken.findMany(),
-      prisma.authenticator.findMany(),
-    ])
-    return Response.json({
-      users,
-      accounts,
-      sessions,
-      tokens,
-      authenticators,
-    })
-  } catch (error) {
-    return Response.json({ error }, { status: 500 })
-  }
-})
-
-
 export const createDummyEntries = withAuth(async (req) => {
+
+  if (process.env.NODE_ENV === 'production')
+    return NextResponse.json({ message: 'Not allowed' }, { status: 403 })
+
   const userId = req.auth.user.id
   await prisma.entry.deleteMany({
     where: { userId }
@@ -252,7 +191,7 @@ export const createDummyEntries = withAuth(async (req) => {
     title: faker.lorem.sentence({ min: 3, max: 10 }),
     description: faker.lorem.paragraph({ min: 0, max: 3 }),
     completed: faker.datatype.boolean(),
-    datetime: faker.date.between({ from: '2022-06-01', to: '2026-06-01' }),
+    date: faker.date.between({ from: '2024-06-01', to: '2025-06-01' }),
     userId: userId,
   } satisfies EntryCreate & { userId: string }))
 
@@ -261,12 +200,4 @@ export const createDummyEntries = withAuth(async (req) => {
   })
 
   return NextResponse.json(result)
-})
-
-export const deleteAllEntries = withAuth(async (req) => {
-  const userId = req.auth.user.id
-  const result = await prisma.entry.deleteMany({
-    where: { userId }
-  })
-  return NextResponse.json({ message: 'Data delete successfully!', result })
 })
