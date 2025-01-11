@@ -132,6 +132,8 @@ export const useEntryCreate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
     ),
     onSuccess: (data) => {
       const tab = getEntryTab(data.date)
+
+      // update report
       queryClient.setQueryData<EntryReport>(
         ['entry/report', getReportParamsByTab(tab)],
         (prev) => (prev ? {
@@ -139,8 +141,9 @@ export const useEntryCreate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
           count: prev.count + 1,
         } : undefined)
       )
+
       queryClient.invalidateQueries({
-        queryKey: ['entry'],
+        queryKey: ['entry', getParamsByTab(tab)],
       })
       queryClient.invalidateQueries({
         queryKey: ['entry/report'],
@@ -168,14 +171,11 @@ export const useEntryUpdate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
       }).json().then(d => parseEntry(d))
     ),
     onSuccess: (data, { prev }) => {
-      queryClient.setQueriesData(
-        { queryKey: ['entry'] },
-        (prev?: InfiniteData<ListAPI<EntryData>>) => (
-          getUpdatedListonMutation(data, prev)
-        )
-      )
-      if (prev && isEqual(data.date, prev.date) && data.completed !== prev.completed) {
-        const tab = getEntryTab(data.date)
+      const isSameDate = prev && isEqual(data.date, prev.date)
+
+      // update report
+      const tab = getEntryTab(data.date)
+      if (isSameDate && data.completed !== prev.completed) {
         queryClient.setQueriesData<EntryReport>(
           { queryKey: ['entry/report', getReportParamsByTab(tab)] },
           (prev) => (prev ? {
@@ -184,9 +184,33 @@ export const useEntryUpdate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
           } : undefined)
         )
       }
-      queryClient.invalidateQueries({
-        queryKey: ['entry'],
-      })
+
+      // update the mutation item with changing the order
+      queryClient.setQueriesData(
+        { queryKey: ['entry'] },
+        (prev?: InfiniteData<ListAPI<EntryData>>) => (
+          getUpdatedListonMutation(data, prev)
+        )
+      )
+
+      // minimize invalidation when the date is updated
+      if (!isSameDate) {
+        queryClient.invalidateQueries({
+          queryKey: ['entry', getParamsByTab(tab)],
+        })
+        const prevTab = prev && getEntryTab(prev.date)
+        if (!prevTab) {
+          queryClient.invalidateQueries({
+            queryKey: ['entry'],
+          })
+        } else if (prevTab !== tab) {
+          queryClient.invalidateQueries({
+            queryKey: ['entry', getParamsByTab(prevTab)],
+          })
+        }
+      }
+
+      // invalidate report
       queryClient.invalidateQueries({
         queryKey: ['entry/report'],
       })
@@ -203,6 +227,8 @@ export const useEntryDelete = ({ onSuccess }: { onSuccess?: () => void } = {}) =
     ),
     onSuccess: (data, prevEntry) => {
       const tab = getEntryTab(prevEntry.date)
+
+      // update report
       queryClient.setQueriesData<EntryReport>(
         { queryKey: ['entry/report', getReportParamsByTab(tab)] },
         (prev) => (prev ? {
@@ -210,14 +236,18 @@ export const useEntryDelete = ({ onSuccess }: { onSuccess?: () => void } = {}) =
           count: prev.count - 1,
         } : undefined)
       )
+
+      // update list
       queryClient.setQueriesData(
         { queryKey: ['entry'] },
         (prev?: InfiniteData<ListAPI<EntryData>>) => (
           getUpdatedListonDeleteMutation(prevEntry.id, prev)
         )
       )
+
+      // invalidate all query, This can be obtimized
       queryClient.invalidateQueries({
-        queryKey: ['entry'],
+        queryKey: ['entry', getParamsByTab(tab)],
       })
       queryClient.invalidateQueries({
         queryKey: ['entry/report'],
