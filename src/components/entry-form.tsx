@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { EntryCreate } from '@/entities/entry'
-import { FormEvent } from 'react'
+import { FormEvent, useEffect, useRef } from 'react'
 
 export default function EntryForm({
   state, onChange, onSubmit, onCancel, disabled
@@ -22,6 +22,15 @@ export default function EntryForm({
     onSubmit()
   }
 
+  const ref = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.style.height = 'auto'
+      ref.current.style.height = `${ref.current.scrollHeight}px`
+    }
+  }, [])
+
   return (
     <form className="flex flex-col p-2 border rounded-md focus-within:ring-1 focus-within:ring-ring" onSubmit={handleSubmit}>
       <Input
@@ -36,13 +45,17 @@ export default function EntryForm({
         className="text-lg border-none py-0 focus-visible:ring-0"
       />
       <Textarea
+        ref={ref}
         name="description"
         value={description || ''}
         placeholder="Description"
-        onChange={({ target: { value, name } }) => {
+        onChange={({ target }) => {
+          const { value, name } = target
           onChange(name as 'description', value)
+          target.style.height = 'auto'
+          target.style.height = `${target.scrollHeight}px`
         }}
-        className="text-lg border-none py-0 focus-visible:ring-0"
+        className="text-lg border-none py-0 focus-visible:ring-0 resize-none"
       />
       <div className="flex justify-between items-center gap-2 mt-2">
         <DateSelector value={date} onChange={(d) => onChange('date', d)} />
