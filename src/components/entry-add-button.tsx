@@ -40,13 +40,15 @@ export default function EntryAddButton() {
         </Button>
       )}
       {showForm && (
-        <EntryForm
-          state={state}
-          onChange={onChange}
-          onSubmit={onSubmit}
-          onCancel={handleClose}
-          disabled={mutation.isPending}
-        />
+        <div className="max-md:px-2">
+          <EntryForm
+            state={state}
+            onChange={onChange}
+            onSubmit={onSubmit}
+            onCancel={handleClose}
+            disabled={mutation.isPending}
+          />
+        </div>
       )}
     </div>
   )

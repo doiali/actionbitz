@@ -169,12 +169,14 @@ const EntryEditForm = ({ entry, onClose }: {
   }
 
   return (
-    <EntryForm
-      state={state}
-      onChange={onChange}
-      onSubmit={onSubmit}
-      onCancel={onClose}
-      disabled={mutation.isPending}
-    />
+    <div className="max-md:px-2">
+      <EntryForm
+        state={state}
+        onChange={onChange}
+        onSubmit={onSubmit}
+        onCancel={onClose}
+        disabled={mutation.isPending}
+      />
+    </div>
   )
 }
