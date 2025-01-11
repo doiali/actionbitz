@@ -1,7 +1,7 @@
 import React from "react"
 import AppBrand from '@/components/app-brand'
 import { Badge } from '@/components/ui/badge'
-import UserButton from '@/components/user-button'
+import StartButton from '@/components/start-button'
 
 export default function Home() {
   return (
@@ -15,7 +15,7 @@ export default function Home() {
           You want to get things done? So just do it!
         </p>
 
-        <UserButton />
+        <StartButton />
       </div>
     </div>
   )
