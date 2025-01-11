@@ -7,7 +7,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 import { UserMenu } from './user-menu'
-import { LifeBuoy, Send } from 'lucide-react'
+import { ChartPie, CircleCheckBig, House, LifeBuoy, Send } from 'lucide-react'
 import { NavSecondary } from './nav-secondary'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -17,6 +17,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <UserMenu />
       </SidebarHeader>
       <SidebarContent>
+        <NavSecondary items={data.navPrimary} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
@@ -26,6 +27,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 }
 
 const data = {
+  navPrimary: [
+    {
+      title: "Actions",
+      url: "/dashboard/now",
+      icon: CircleCheckBig,
+      isActive: (segment: string | null) => segment === '(app)',
+    },
+    {
+      title: "Reports",
+      url: "#",
+      icon: ChartPie,
+    },
+  ],
   navSecondary: [
     {
       title: "Support",
@@ -36,6 +50,11 @@ const data = {
       title: "Feedback",
       url: "#",
       icon: Send,
+    },
+    {
+      title: "Landing Page",
+      url: "/",
+      icon: House,
     },
   ]
 }
