@@ -2,6 +2,7 @@ import AppBrand from '@/components/app-brand'
 import ThemeToggle from '@/components/theme-toggle'
 import Link from 'next/link'
 import React, { ReactNode } from 'react'
+import { FaXTwitter } from 'react-icons/fa6'
 
 const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
   return (
@@ -14,7 +15,14 @@ const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
       <main className="grow flex flex-col">
         {children}
       </main>
-      <footer className="p-2 md:p-4 flex flex-col gap-2 border-t">
+      <footer className="p-2 md:px-4 flex flex-col gap-2 border-t">
+        <p className="text-muted-foreground text-sm flex items-center justify-center gap-2">
+          <span>Created by:</span>
+          <a className="flex items-center gap-1" href='https://x.com/doiali'>
+            <FaXTwitter className="inline-flex" />
+            <span>Doiali</span>
+          </a>
+        </p>
         <div className="flex flex-wrap justify-center text-sm text-muted-foreground gap-4">
           <ul className="flex">
             <li className="px-2 border-e border-border inline-flex">
