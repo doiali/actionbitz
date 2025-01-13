@@ -10,6 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { Button } from './ui/button'
 
 export default function EntryReportPage() {
   return (
@@ -42,18 +43,16 @@ const OverviewReport: React.FC = () => {
   const { data } = useEntryReport('past')
   return (
     <Card>
-      <div className="flex flex-col p-6 border-b h-16">
-        <CardTitle>
+      <div className="flex justify-between items-center p-6 border-b h-16">
+        <CardTitle className="flex p-0 ">
           <h2 className="">
             Overview
           </h2>
         </CardTitle>
+        <Button variant="outline">All time</Button>
       </div>
       <div className="p-6 py-4 flex flex-col">
         <EntryPastStats data={data} />
-        <p className="flex items-center justify-center gap-2 text-muted-foreground mt-4">
-          <Wrench className="" /> enhancements comming ...
-        </p>
       </div>
     </Card>
   )
