@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label"
 import { FormEvent, useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useSearchParams } from 'next/navigation'
-import { FaGoogle, FaGithub } from 'react-icons/fa6'
+import { FaGoogle, FaGithub, FaXTwitter } from 'react-icons/fa6'
 import AppBrand from './app-brand'
 import Link from 'next/link'
 
@@ -60,6 +60,12 @@ export function LoginForm({
                   onClick={() => signIn('github')}
                 >
                   <FaGithub /> Continue with GitHub
+                </Button>
+                <Button
+                  type="button" variant="outline" className="w-full"
+                  onClick={() => signIn('twitter')}
+                >
+                  <FaXTwitter /> Continue with X
                 </Button>
               </div>
               <p className="text-center">Or</p>
