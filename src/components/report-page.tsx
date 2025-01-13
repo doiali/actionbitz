@@ -1,15 +1,19 @@
 'use client'
 
-import { useEntryReport } from '@/entities/enrty-report'
+import { useEntryDailyReport, useEntryReport } from '@/entities/enrty-report'
 import { EntryPastStats } from './entry-stats'
 import { Card, CardTitle } from './ui/card'
-import { Crown, Sparkles, Wrench } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Crown, Sparkles, Wrench } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { Button } from './ui/button'
+import { EntryWeeklyChart } from './report-weekly'
+import { useState } from 'react'
+import { addDays, format, isSameDay, isSameMonth, startOfWeek } from 'date-fns'
 
 export default function EntryReportPage() {
   return (
@@ -17,9 +21,9 @@ export default function EntryReportPage() {
       <h1 className="text-3xl font-bold mb-8">Reports</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-4">
         <OverviewReport />
-        <ReportWidget title='Weekly breakdown'><ComingSoon /></ReportWidget>
-        <ReportWidget pro title='Calendar'><ComingSoon /></ReportWidget>
-        <ReportWidget pro title='Label break down'><ComingSoon /></ReportWidget>
+        <WeeklyReport />
+        <ReportWidget className="order-3 md:order-2" pro title='Label break down'><ComingSoon /></ReportWidget>
+        <ReportWidget className="order-4" pro title='Calendar'><ComingSoon /></ReportWidget>
       </div>
       <div className="grid grid-cols-1 mt-6 md:mt-4">
         <ReportWidget pro
@@ -41,30 +45,76 @@ export default function EntryReportPage() {
 const OverviewReport: React.FC = () => {
   const { data } = useEntryReport('past')
   return (
-    <Card>
-      <div className="flex flex-col p-6 border-b h-16">
-        <CardTitle>
+    <Card className="order-1">
+      <div className="flex justify-between items-center p-6 border-b h-16">
+        <CardTitle className="flex p-0 ">
           <h2 className="">
             Overview
           </h2>
         </CardTitle>
+        <Button variant="outline">All time</Button>
       </div>
       <div className="p-6 py-4 flex flex-col">
         <EntryPastStats data={data} />
-        <p className="flex items-center justify-center gap-2 text-muted-foreground mt-4">
-          <Wrench className="" /> enhancements comming ...
-        </p>
       </div>
     </Card>
   )
 }
 
+const WeeklyReport: React.FC = () => {
+  const { data } = useEntryDailyReport()
+  const { label, setWeek, weekDays } = useWeekSelector()
+  const chartData = weekDays.map((d => {
+    const { count = 0, done = 0 } = data?.find(x => isSameDay(x.date, d)) ?? {}
+    return {
+      day: format(d, 'EEEE'),
+      done,
+      missed: count - done,
+    }
+  }))
+
+  return (
+    <Card className="order-2 md:order-3">
+      <div className="flex justify-between items-center p-6 border-b h-16">
+        <CardTitle className="flex p-0 ">
+          <h2 className="">
+            Weekly breakdown
+          </h2>
+        </CardTitle>
+      </div>
+      <div className="p-6 py-4 flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" size="icon" onClick={() => setWeek(p => addDays(p, -7))}>
+            <ChevronLeft />
+          </Button>
+          {label}
+          <Button variant="ghost" size="icon" onClick={() => setWeek(p => addDays(p, 7))}>
+            <ChevronRight />
+          </Button>
+        </div>
+        <EntryWeeklyChart data={chartData} />
+      </div>
+    </Card>
+  )
+}
+
+const useWeekSelector = () => {
+  const [week, setWeek] = useState(startOfWeek(new Date()))
+  const lastday = addDays(week, 6)
+  const sameMonth = isSameMonth(week, lastday)
+  const label = format(week, 'MMM d') + ' - ' + (
+    sameMonth ? format(lastday, 'd') : format(lastday, 'MMM d')
+  )
+  const weekDays = [...Array(7)].map((_, i) => addDays(week, i))
+  return { week, setWeek, label, weekDays }
+}
+
 
 const ReportWidget: React.FC<{
-  children?: React.ReactNode, title?: React.ReactNode, pro?: boolean
-}> = ({ children, title = 'Some cool stats', pro }) => {
+  children?: React.ReactNode, title?: React.ReactNode, pro?: boolean, className?: string
+}> = ({ children, title = 'Some cool stats', pro, className }) => {
   return (
-    <Card className="flex flex-col">
+    <Card className={"flex flex-col " + className} >
       <div className="flex items-center px-6 border-b h-16">
         <CardTitle className="flex justify-between items-center w-full">
           <h2 className="flex items-center gap-2">

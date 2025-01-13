@@ -7,7 +7,7 @@ import { EntryCreate, EntryData, EntryJson } from '@/entities/entry'
 import { faker } from '@faker-js/faker'
 import { EntryReport } from '@/entities/enrty-report'
 import { Prisma } from '@prisma/client'
-import { parseDateServer } from '@/utils/utils'
+import { parseDateServer, serializeDateServer } from '@/utils/utils'
 
 
 const DEFAULT_LIMIT = 10
@@ -51,6 +51,34 @@ export const getEntryReport = withAuth(async (req) => {
     daysActive: Number(daysActive)
   } satisfies EntryReport)
 })
+
+
+export const getEntryDailyReport = withAuth(async (req) => {
+  const userId = req.auth.user.id
+  const searchParams = req.nextUrl.searchParams
+  const from = searchParams.get('from')
+  const to = searchParams.get('to')
+
+  const sql = Prisma.sql`
+    SELECT 
+       "date"
+      ,COUNT(*) AS "count"
+      ,SUM(CASE WHEN completed = true THEN 1 ELSE 0 END) AS "done"
+    FROM "Entry"
+    WHERE "userId" = ${userId}
+    AND ${from ? Prisma.sql`"date" >= ${new Date(from)}::date` : Prisma.sql`1=1`}
+    AND ${to ? Prisma.sql`"date" < ${new Date(to)}::date` : Prisma.sql`1=1`}
+    GROUP BY "date"
+    ORDER BY "date" DESC
+  `
+  const result = await prisma.$queryRaw(sql) as { date: Date, count: number, done: number }[]
+
+  return NextResponse.json(
+    result.map(x => ([serializeDateServer(x.date), Number(x.count), Number(x.done)]))
+  )
+})
+
+
 
 export const getEntries = withAuth(async (req) => {
   const userId = req.auth.user.id
@@ -114,7 +142,6 @@ export const getEntry = withAuth<{ id: string }>(async (req, { params }) => {
 export const createEntry = withAuth(async (req) => {
   const userId = req.auth.user.id
   const { title, description, datetime, date, type } = await req.json() as EntryJson
-  console.log(date, parseDateServer(date))
   const entry = await prisma.entry.create({
     data: {
       title,
@@ -191,7 +218,7 @@ export const createDummyEntries = withAuth(async (req) => {
     title: faker.lorem.sentence({ min: 3, max: 10 }),
     description: faker.lorem.paragraph({ min: 0, max: 3 }),
     completed: faker.datatype.boolean(),
-    date: faker.date.between({ from: '2024-06-01', to: '2025-06-01' }),
+    date: faker.date.between({ from: '2024-11-01', to: '2025-02-01' }),
     userId: userId,
   } satisfies EntryCreate & { userId: string }))
 

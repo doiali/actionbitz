@@ -1,5 +1,5 @@
 import apiClient from '@/utils/apiClient'
-import { serializeDate } from '@/utils/utils'
+import { parseDate, serializeDate } from '@/utils/utils'
 import { useQuery } from '@tanstack/react-query'
 import { startOfToday, startOfTomorrow } from 'date-fns'
 
@@ -9,6 +9,16 @@ export type EntryReport = {
   days: number,
   totalDays: number,
   daysActive: number,
+}
+
+export type EntryDailyReportJson = [
+  string, number, number
+] // date, count, done
+
+export type EntryDailyReport = {
+  date: Date,
+  count: number,
+  done: number,
 }
 
 export type EntryReportParams = {
@@ -35,5 +45,15 @@ export const useEntryReport = (tab: 'now' | 'past' | 'future' = 'now') => {
   return useQuery<EntryReport>({
     queryKey: ['entry/report', params],
     queryFn: () => apiClient.get<EntryReport>(`entry/report?${getEntryReportSearchParams(params)}`).json(),
+  })
+}
+
+export const useEntryDailyReport = () => {
+  return useQuery<EntryDailyReport[]>({
+    queryKey: ['entry/report/daily'],
+    queryFn: () => apiClient.get<EntryDailyReportJson[]>(`entry/report/daily`).json()
+      .then(x => x.map(y => ({
+        date: parseDate(y[0]), count: y[1], done: y[2]
+      }) satisfies EntryDailyReport)),
   })
 }

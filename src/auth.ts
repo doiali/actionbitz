@@ -6,11 +6,17 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { sendVerificationRequest } from './lib/magic-link-request'
+import seedUserTodos from './lib/seed-user'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   pages: {
     signIn: '/auth/signin',
+  },
+  events: {
+    createUser: async ({ user }) => {
+      await seedUserTodos(user)
+    }
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {

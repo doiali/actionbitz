@@ -11,6 +11,8 @@ import { ChartConfig, ChartContainer } from "@/components/ui/chart"
 import { EntryReport, useEntryReport } from '@/entities/enrty-report'
 import { memo } from 'react'
 import { Card } from './ui/card'
+import { Button } from './ui/button'
+import Link from 'next/link'
 
 const EntryStats: React.FC<{ tab?: 'past' | 'now' | 'future' }> = ({ tab = 'now' }) => {
   const { data } = useEntryReport(tab)
@@ -34,6 +36,11 @@ const EntryStats: React.FC<{ tab?: 'past' | 'now' | 'future' }> = ({ tab = 'now'
         <Card className="flex flex-col gap-2 p-4 px-6">
           <h3 className="font-bold text-xl">Action report</h3>
           <EntryPastStats data={data} />
+          <Button variant="outline" className="border-primary/50 mt-2" asChild>
+            <Link href="/dashboard/report">
+              Expore more cool reports
+            </Link>
+          </Button>
         </Card>
       </div>
     )
@@ -48,10 +55,10 @@ export const EntryPastStats: React.FC<{ data?: EntryReport }> = ({ data }) => {
     <div className="flex items-center justify-between gap-4">
       <div className="flex flex-col gap-2 text-muted-foreground text-sm">
         <span>Last <Stat value={totalDays} /> days</span>
-        <span>active <Stat value={daysActive} /> of <Stat value={days} /> days</span>
+        <span>Active <Stat value={daysActive} /> of <Stat value={days} /> days</span>
         <span className="flex gap-2 ">
-          <span>done: <Stat value={completed} /></span>
-          <span>missed: <Stat value={count - completed} /></span>
+          <span>Done: <Stat value={completed} /></span>
+          <span>Missed: <Stat value={count - completed} /></span>
         </span>
       </div>
       <div className="flex flex-row justify-center pb-0 h-[110px]">
@@ -89,7 +96,6 @@ const chartConfig = {
 const EntryChart = memo(({ value = 0, label, labelSecondary, size = 30 }: {
   value?: number, label?: string, labelSecondary?: string, size?: number
 }) => {
-  console.log(value)
   const endAngle = value * 360 + 90
   const chartData = [
     { name: "report", value: endAngle, fill: "var(--color-report)" },
