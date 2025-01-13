@@ -22,8 +22,8 @@ export default function EntryReportPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-4">
         <OverviewReport />
         <WeeklyReport />
-        <ReportWidget pro title='Calendar'><ComingSoon /></ReportWidget>
-        <ReportWidget pro title='Label break down'><ComingSoon /></ReportWidget>
+        <ReportWidget className="order-3 md:order-2" pro title='Label break down'><ComingSoon /></ReportWidget>
+        <ReportWidget className="order-4" pro title='Calendar'><ComingSoon /></ReportWidget>
       </div>
       <div className="grid grid-cols-1 mt-6 md:mt-4">
         <ReportWidget pro
@@ -45,7 +45,7 @@ export default function EntryReportPage() {
 const OverviewReport: React.FC = () => {
   const { data } = useEntryReport('past')
   return (
-    <Card>
+    <Card className="order-1">
       <div className="flex justify-between items-center p-6 border-b h-16">
         <CardTitle className="flex p-0 ">
           <h2 className="">
@@ -74,7 +74,7 @@ const WeeklyReport: React.FC = () => {
   }))
 
   return (
-    <Card>
+    <Card className="order-2 md:order-3">
       <div className="flex justify-between items-center p-6 border-b h-16">
         <CardTitle className="flex p-0 ">
           <h2 className="">
@@ -111,10 +111,10 @@ const useWeekSelector = () => {
 
 
 const ReportWidget: React.FC<{
-  children?: React.ReactNode, title?: React.ReactNode, pro?: boolean
-}> = ({ children, title = 'Some cool stats', pro }) => {
+  children?: React.ReactNode, title?: React.ReactNode, pro?: boolean, className?: string
+}> = ({ children, title = 'Some cool stats', pro, className }) => {
   return (
-    <Card className="flex flex-col">
+    <Card className={"flex flex-col " + className} >
       <div className="flex items-center px-6 border-b h-16">
         <CardTitle className="flex justify-between items-center w-full">
           <h2 className="flex items-center gap-2">

@@ -218,7 +218,7 @@ export const createDummyEntries = withAuth(async (req) => {
     title: faker.lorem.sentence({ min: 3, max: 10 }),
     description: faker.lorem.paragraph({ min: 0, max: 3 }),
     completed: faker.datatype.boolean(),
-    date: faker.date.between({ from: '2024-09-01', to: '2025-03-01' }),
+    date: faker.date.between({ from: '2024-11-01', to: '2025-02-01' }),
     userId: userId,
   } satisfies EntryCreate & { userId: string }))
 
