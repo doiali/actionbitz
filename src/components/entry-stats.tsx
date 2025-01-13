@@ -11,6 +11,8 @@ import { ChartConfig, ChartContainer } from "@/components/ui/chart"
 import { EntryReport, useEntryReport } from '@/entities/enrty-report'
 import { memo } from 'react'
 import { Card } from './ui/card'
+import { Button } from './ui/button'
+import Link from 'next/link'
 
 const EntryStats: React.FC<{ tab?: 'past' | 'now' | 'future' }> = ({ tab = 'now' }) => {
   const { data } = useEntryReport(tab)
@@ -34,6 +36,11 @@ const EntryStats: React.FC<{ tab?: 'past' | 'now' | 'future' }> = ({ tab = 'now'
         <Card className="flex flex-col gap-2 p-4 px-6">
           <h3 className="font-bold text-xl">Action report</h3>
           <EntryPastStats data={data} />
+          <Button variant="outline" className="border-primary/50 mt-2" asChild>
+            <Link href="/dashboard/report">
+              Expore more cool reports
+            </Link>
+          </Button>
         </Card>
       </div>
     )
