@@ -12,9 +12,9 @@ export default function Home() {
           <Badge className="mt-6 border-primary rounded-full" variant="outline">Beta</Badge>
         </span>
         <p className="mb-4 text-xl">
-          Want to get things done? just do it!
+          Simple Journaling Todo App
         </p>
-
+        <p className="text-muted-foreground mb-4">For busy individuals who focus on getting things done!</p>
         <StartButton />
       </div>
     </div>
