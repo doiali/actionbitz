@@ -13,7 +13,6 @@ export default async function seedUserTodos({ id }: User) {
           userId: id,
         }))
       })
-      console.log("Initial demo todos created for user: ", id)
     }
   } catch (e) {
     console.error(`Error creating initial demo todos for ${id}:`)

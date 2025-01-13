@@ -20,6 +20,9 @@ export const parseDateServer = (x: string) => {
 export const serializeDate = (x: Date) => {
   return (format(x, 'yyyy-MM-dd') + 'T00:00:00')
 }
+export const serializeDateServer = (x: Date) => {
+  return x.toISOString().substring(0, 10)
+}
 
 export const serializeDateTimeSafe = (date?: Date | null | undefined) => (
   date ? date.toISOString() : null

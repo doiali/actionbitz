@@ -96,7 +96,6 @@ const chartConfig = {
 const EntryChart = memo(({ value = 0, label, labelSecondary, size = 30 }: {
   value?: number, label?: string, labelSecondary?: string, size?: number
 }) => {
-  console.log(value)
   const endAngle = value * 360 + 90
   const chartData = [
     { name: "report", value: endAngle, fill: "var(--color-report)" },

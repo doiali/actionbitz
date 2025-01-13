@@ -1,6 +1,6 @@
 'use client'
 
-import { useEntryReport } from '@/entities/enrty-report'
+import { useEntryDailyReport, useEntryReport } from '@/entities/enrty-report'
 import { EntryPastStats } from './entry-stats'
 import { Card, CardTitle } from './ui/card'
 import { Crown, Sparkles, Wrench } from 'lucide-react'
@@ -60,6 +60,7 @@ const OverviewReport: React.FC = () => {
 }
 
 const WeeklyReport: React.FC = () => {
+  const { data } = useEntryDailyReport()
   return (
     <Card>
       <div className="flex justify-between items-center p-6 border-b h-16">
