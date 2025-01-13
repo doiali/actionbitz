@@ -1,24 +1,11 @@
 import NextAuth, { Session } from 'next-auth'
-import Credentials from 'next-auth/providers/credentials'
 import GitHub from "next-auth/providers/github"
 import Google from "next-auth/providers/google"
 import Resend from "next-auth/providers/resend"
 import { PrismaAdapter } from "@auth/prisma-adapter"
-import { z } from 'zod'
-import bcrypt from 'bcrypt'
-import { User } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
-
-async function getUser(email: string): Promise<User | undefined> {
-  try {
-    const user = await prisma.user.findFirst({ where: { email } })
-    return user || undefined
-  } catch (error) {
-    console.error('Failed to fetch user:', error)
-    throw new Error('Failed to fetch user.')
-  }
-}
+import { sendVerificationRequest } from './lib/magic-link-request'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -43,35 +30,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     GitHub({ allowDangerousEmailAccountLinking: true }),
     Google({ allowDangerousEmailAccountLinking: true }),
     Resend({
-      from: "no-reply@actionbitz.com",
-    }),
-    Credentials({
-      async authorize(credentials) {
-        const parsedCredentials = z
-          .object({ email: z.string().email(), password: z.string().min(6) })
-          .safeParse(credentials)
-
-        if (parsedCredentials.success) {
-          const { email, password } = parsedCredentials.data
-          const user = await getUser(email)
-          if (!user) return null
-          const passwordsMatch = await bcrypt.compare(password, user.password || '')
-          if (passwordsMatch) return user
-        }
-        return null
-      },
-      credentials: {
-        email: {
-          label: 'Email',
-          type: 'email',
-          placeholder: 'a@example.com',
-        },
-        password: {
-          label: 'Password',
-          type: 'password',
-        },
-      }
-    }),
+      from: "Actionbitz <no-reply@actionbitz.com>",
+      sendVerificationRequest,
+    })
   ],
 })
 
