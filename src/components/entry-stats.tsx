@@ -48,10 +48,10 @@ export const EntryPastStats: React.FC<{ data?: EntryReport }> = ({ data }) => {
     <div className="flex items-center justify-between gap-4">
       <div className="flex flex-col gap-2 text-muted-foreground text-sm">
         <span>Last <Stat value={totalDays} /> days</span>
-        <span>active <Stat value={daysActive} /> of <Stat value={days} /> days</span>
+        <span>Active <Stat value={daysActive} /> of <Stat value={days} /> days</span>
         <span className="flex gap-2 ">
-          <span>done: <Stat value={completed} /></span>
-          <span>missed: <Stat value={count - completed} /></span>
+          <span>Done: <Stat value={completed} /></span>
+          <span>Missed: <Stat value={count - completed} /></span>
         </span>
       </div>
       <div className="flex flex-row justify-center pb-0 h-[110px]">
