@@ -1,7 +1,6 @@
 import NextAuth, { Session } from 'next-auth'
 import GitHub from "next-auth/providers/github"
 import Google from "next-auth/providers/google"
-import Twitter from "next-auth/providers/twitter"
 import Resend from "next-auth/providers/resend"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from '@/lib/prisma'
@@ -36,7 +35,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     GitHub({ allowDangerousEmailAccountLinking: true }),
     Google({ allowDangerousEmailAccountLinking: true }),
-    Twitter({ allowDangerousEmailAccountLinking: true }),
     Resend({
       from: "Actionbitz <no-reply@actionbitz.com>",
       sendVerificationRequest,
