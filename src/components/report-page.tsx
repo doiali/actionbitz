@@ -11,6 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Button } from './ui/button'
+import { EntryWeeklyChart } from './report-weekly'
 
 export default function EntryReportPage() {
   return (
@@ -18,7 +19,7 @@ export default function EntryReportPage() {
       <h1 className="text-3xl font-bold mb-8">Reports</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-4">
         <OverviewReport />
-        <ReportWidget title='Weekly breakdown'><ComingSoon /></ReportWidget>
+        <WeeklyReport />
         <ReportWidget pro title='Calendar'><ComingSoon /></ReportWidget>
         <ReportWidget pro title='Label break down'><ComingSoon /></ReportWidget>
       </div>
@@ -53,6 +54,23 @@ const OverviewReport: React.FC = () => {
       </div>
       <div className="p-6 py-4 flex flex-col">
         <EntryPastStats data={data} />
+      </div>
+    </Card>
+  )
+}
+
+const WeeklyReport: React.FC = () => {
+  return (
+    <Card>
+      <div className="flex justify-between items-center p-6 border-b h-16">
+        <CardTitle className="flex p-0 ">
+          <h2 className="">
+            Weekly breakdown
+          </h2>
+        </CardTitle>
+      </div>
+      <div className="p-6 py-4 flex flex-col">
+        <EntryWeeklyChart />
       </div>
     </Card>
   )
