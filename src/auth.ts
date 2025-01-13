@@ -30,8 +30,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     GitHub({ allowDangerousEmailAccountLinking: true }),
     Google({ allowDangerousEmailAccountLinking: true }),
     Resend({
-      from: "no-reply@actionbitz.com",
-      name: 'Actionbitz',
+      from: "Actionbitz <no-reply@actionbitz.com>",
       sendVerificationRequest,
     })
   ],
