@@ -3,7 +3,7 @@
 import { useEntryDailyReport, useEntryReport } from '@/entities/enrty-report'
 import { EntryPastStats } from './entry-stats'
 import { Card, CardTitle } from './ui/card'
-import { Crown, Sparkles, Wrench } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Crown, Sparkles, Wrench } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/tooltip"
 import { Button } from './ui/button'
 import { EntryWeeklyChart } from './report-weekly'
+import { useState } from 'react'
+import { addDays, format, isSameDay, isSameMonth, startOfWeek } from 'date-fns'
 
 export default function EntryReportPage() {
   return (
@@ -61,6 +63,16 @@ const OverviewReport: React.FC = () => {
 
 const WeeklyReport: React.FC = () => {
   const { data } = useEntryDailyReport()
+  const { label, setWeek, weekDays } = useWeekSelector()
+  const chartData = weekDays.map((d => {
+    const { count = 0, done = 0 } = data?.find(x => isSameDay(x.date, d)) ?? {}
+    return {
+      day: format(d, 'EEEE'),
+      done,
+      missed: count - done,
+    }
+  }))
+
   return (
     <Card>
       <div className="flex justify-between items-center p-6 border-b h-16">
@@ -70,11 +82,31 @@ const WeeklyReport: React.FC = () => {
           </h2>
         </CardTitle>
       </div>
-      <div className="p-6 py-4 flex flex-col">
-        <EntryWeeklyChart />
+      <div className="p-6 py-4 flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" size="icon" onClick={() => setWeek(p => addDays(p, -7))}>
+            <ChevronLeft />
+          </Button>
+          {label}
+          <Button variant="ghost" size="icon" onClick={() => setWeek(p => addDays(p, 7))}>
+            <ChevronRight />
+          </Button>
+        </div>
+        <EntryWeeklyChart data={chartData} />
       </div>
     </Card>
   )
+}
+
+const useWeekSelector = () => {
+  const [week, setWeek] = useState(startOfWeek(new Date()))
+  const lastday = addDays(week, 6)
+  const sameMonth = isSameMonth(week, lastday)
+  const label = format(week, 'MMM d') + ' - ' + (
+    sameMonth ? format(lastday, 'd') : format(lastday, 'MMM d')
+  )
+  const weekDays = [...Array(7)].map((_, i) => addDays(week, i))
+  return { week, setWeek, label, weekDays }
 }
 
 

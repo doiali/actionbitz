@@ -11,14 +11,9 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-const chartData = [
-  { day: "Monday", done: 186, missed: 80 },
-  { day: "Tuesday", done: 305, missed: 200 },
-  { day: "Wednesday", done: 237, missed: 120 },
-  { day: "Thursday", done: 73, missed: 190 },
-  { day: "Friday", done: 209, missed: 130 },
-  { day: "Saturday", done: 214, missed: 140 },
-]
+type WeekyData = {
+  day: string, done: number, missed: number
+}
 
 const chartConfig = {
   done: {
@@ -31,7 +26,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function EntryWeeklyChart() {
+export const EntryWeeklyChart: React.FC<{ data: WeekyData[] }> = ({ data: chartData }) => {
   return (
     <ChartContainer config={chartConfig}>
       <BarChart accessibilityLayer data={chartData}>
