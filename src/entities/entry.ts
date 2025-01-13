@@ -19,7 +19,7 @@ export type EntryCreate = {
   title: string
   type?: EntryType
   description?: string | null
-  completed: boolean
+  completed?: boolean
   date: Date
   datetime?: Date | null
 }
