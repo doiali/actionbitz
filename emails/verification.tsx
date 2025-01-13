@@ -17,13 +17,15 @@ import * as React from "react"
 interface LinearLoginCodeEmailProps {
   url: string,
   host: string,
+  escapedHost: string,
+  baseUrl: string,
 }
 
+// const escapedHost = host.replace(/\./g, "​.")
+
 export const LinearLoginCodeEmail = ({
-  url, host
+  url, host, escapedHost, baseUrl
 }: LinearLoginCodeEmailProps) => {
-  const escapedHost = host.replace(/\./g, "​.")
-  const baseUrl = `https://${host}`
   return (
     <Html>
       <Head />

@@ -5,6 +5,7 @@ import Resend from "next-auth/providers/resend"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
+import { sendVerificationRequest } from './lib/magic-link-request'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -31,6 +32,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Resend({
       from: "no-reply@actionbitz.com",
       name: 'Actionbitz',
+      sendVerificationRequest,
     })
   ],
 })
