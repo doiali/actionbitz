@@ -110,7 +110,7 @@ const EntryItem = ({ entry }: {
             className="hover:cursor-pointer grow text-start flex flex-col gap-1"
             onClick={() => setEdit(true)}
           >
-            <span>{entry.title}</span>
+            <span className="truncate">{entry.title}</span>
             <span className="line-clamp-1 whitespace-pre-line text-sm text-muted-foreground">{entry.description}</span>
           </button>
           <span><EntryMenu entry={entry} /></span>
