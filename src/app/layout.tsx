@@ -4,6 +4,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google"
 import { ThemeProvider } from '@/components/theme-provider'
 import { SessionProvider } from 'next-auth/react'
 import Providers from '@/components/app-providers'
+import HotjarScript from '@/components/hotjar-script'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -77,6 +78,7 @@ export default function RootLayout({
             </SessionProvider>
           </ThemeProvider>
         </Providers>
+        <HotjarScript />
       </body>
     </html>
   )
