@@ -4,9 +4,11 @@ import img_now from '@/../public/static/todo-app-now.png'
 import img_past from '@/../public/static/todo-app-past.png'
 import img_report from '@/../public/static/todo-app-report.png'
 import Image, { StaticImageData } from 'next/image'
-import { Check } from 'lucide-react'
+import { Check, Wrench } from 'lucide-react'
 import clsx from 'clsx'
 import Story from './home-page-story.mdx'
+import { Card, CardContent, CardHeader } from './ui/card'
+import { Button } from './ui/button'
 
 
 export default function Home() {
@@ -14,9 +16,9 @@ export default function Home() {
     <div className="flex flex-col px-4">
       <section className="flex justify-center items-center text-center min-h-[100vh]">
         <div className="flex flex-col items-center">
-          <p className="mb-4 text-3xl sm:text-5xl lg:text-6xl">
+          <h1 className="mb-4 text-3xl sm:text-5xl lg:text-6xl">
             Simple Journaling Todo App
-          </p>
+          </h1>
           <p className="text-muted-foreground">For busy individuals with <span className="font-bold text-lg">lots of</span> todos!</p>
           <p className="text-muted-foreground mb-4">Those who know <i>plannig to do the thing is not doing the thing!</i></p>
           <StartButton />
@@ -24,7 +26,7 @@ export default function Home() {
       </section>
       <section className="bg-background/85">
         <div className="py-12 relative w-full max-w-3xl mx-auto">
-          <h1 className="relative text-center text-3xl px-4">How it works?</h1>
+          <h1 className="relative text-center text-3xl font-bold px-4">How it works?</h1>
         </div>
         <div className="w-full max-w-3xl mx-auto flex flex-col">
           <Item img={img_now} data={data[0]} index={1} />
@@ -33,15 +35,68 @@ export default function Home() {
         </div>
       </section >
       <section className="flex flex-col items-center py-12">
-        <h2 className="font-bold text-2xl mb-4">My story</h2>
+        <h2 className="font-bold text-3xl mb-4">My story</h2>
         <h3 className="font-bold text-lg mb-4">Why Did I Build a Todo App in 2025?</h3>
         <div className="prose dark:prose-invert prose-sm text-center">
           <Story />
         </div>
       </section>
+      <section className="w-full max-w-3xl mx-auto flex flex-col py-12">
+        <h2 className="font-bold text-3xl mb-6 text-center">Pricing</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mx-auto">
+          <PriceCard data={plans[0]} />
+          <PriceCard data={plans[1]} />
+        </div>
+        <p className="text-center text-sm text-muted-foreground mt-10 mb-16 max-w-xl mx-auto">
+          Please note that Actionbitz is still in its early stages and requires further testing. If you encounter any issues, I’d greatly appreciate it if you could report them. And if you have any suggestions or feedback, don’t hesitate to let me know. I’d love to hear from you!
+        </p>
+      </section>
     </div >
   )
 }
+
+
+const PriceCard: React.FC<{ data: Plan }> = ({ data: { items, title, cta, price } }) => {
+  return (
+    <Card>
+      <CardHeader>
+        <h2 className="font-bold text-x text-muted-foreground">{title}</h2>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <div>
+          {!!price ? (
+            <p><span className="text-3xl font-bold">${price}/<span className="text-sm text-muted-foreground">month</span></span></p>
+          ) : (
+            <span className="text-3xl font-bold">Free</span>
+          )}
+        </div>
+        <div className="flex flex-col">
+          {cta
+            ? <StartButton variant="outline" className="border-primary" />
+            : <Button variant="outline" disabled>
+              <Wrench className="" />
+              Comming soon
+            </Button>
+          }
+        </div>
+        <ul className="flex flex-col py-4 gap-4">
+          {items.map(([title, ready], i) => (
+            <li key={i} className="text-base text-muted-foreground flex gap-2">
+              {ready
+                ? <Check className="text-primary" />
+                : <Wrench className="text-muted-foreground/25" />
+              }
+              {title}
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  )
+}
+
+
+
 type Data = { title: string, points: [string, string?, boolean?][] }
 const Item: React.FC<{
   img: StaticImageData
@@ -74,6 +129,37 @@ const Item: React.FC<{
     </>
   )
 }
+type Plan = {
+  title: string,
+  items: [string, boolean][],
+  cta?: string,
+  price?: number,
+}
+const plans: Plan[] = [
+  {
+    title: 'Basic',
+    items: [
+      ['Unlimited todos', true],
+      ['Unlimited hisory', true],
+      ['Reports: last 30 days', true],
+      ['Subtasks', false],
+    ],
+    cta: 'Get started',
+  },
+  {
+    title: 'Premium',
+    items: [
+      ['All in free', true],
+      ['Unlimited reports', true],
+      ['Labels and Categories', false],
+      ['Calendar integrations', false],
+      ['Export reports', false],
+      ['AI features', false],
+    ],
+    price: 3.99,
+  }
+]
+
 
 
 const data: Data[] = [
