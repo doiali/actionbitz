@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { SessionProvider } from 'next-auth/react'
 import Providers from '@/components/app-providers'
 import HotjarScript from '@/components/hotjar-script'
+import Script from 'next/script'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -79,6 +80,7 @@ export default function RootLayout({
           </ThemeProvider>
         </Providers>
         <HotjarScript />
+        {process.env.NODE_ENV === 'production' && <Script async src="https://scripts.simpleanalyticscdn.com/latest.js" />}
       </body>
     </html>
   )
