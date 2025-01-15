@@ -34,7 +34,7 @@ export default function Home() {
           <Item img={img_past} data={data[2]} index={3} />
         </div>
       </section >
-      <section className="flex flex-col items-center py-24">
+      <section className="flex flex-col items-center text-center py-24">
         <h2 className="font-bold text-3xl mb-4">My story</h2>
         <h3 className="font-bold text-lg mb-4">Why Did I Build a Todo App in 2025?</h3>
         <div className="prose dark:prose-invert prose-sm text-center">
@@ -60,12 +60,12 @@ export default function Home() {
 
 const PriceCard: React.FC<{ data: Plan }> = ({ data: { items, title, cta, price } }) => {
   return (
-    <Card>
+    <Card className="px-2">
       <CardHeader>
         <h2 className="font-bold text-x text-muted-foreground">{title}</h2>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <div>
+        <div className="mb-2">
           {!!price ? (
             <p><span className="text-3xl font-bold">${price}/<span className="text-sm text-muted-foreground">month</span></span></p>
           ) : (
@@ -83,7 +83,7 @@ const PriceCard: React.FC<{ data: Plan }> = ({ data: { items, title, cta, price 
         </div>
         <ul className="flex flex-col py-4 gap-4">
           {items.map(([title, ready], i) => (
-            <li key={i} className="text-base text-muted-foreground flex gap-2">
+            <li key={i} className="text-base text-muted-foreground flex gap-4">
               {ready
                 ? <Check className="text-primary" />
                 : <Wrench className="text-muted-foreground/25" />
@@ -110,11 +110,11 @@ const Item: React.FC<{
     <>
       <div className="flex flex-col items-center">
         <span className="font-bold text-4xl border-4 rounded-full p-4 aspect-square flex justify-center border-foreground">{index}</span>
-        <h2 className="font-semibold text-2xl mt-4">{data.title}</h2>
+        <h2 className="font-semibold text-2xl mt-4 text-center">{data.title}</h2>
       </div>
-      <div className="py-12 items-start flex">
-        <Image src={img} alt="app-now" className={clsx("w-[18rem] rounded-xl dark:border h-[30rem] object-contain object-[0_1rem]", reverse && 'order-1 md:order-2')} />
-        <div className={clsx("flex flex-col gap-4 grow", reverse && 'order-2 md:order-1 md:pe-12', !reverse && 'md:ms-12')}>
+      <div className="py-12 gap-12 flex flex-col md:flex-row md:items-start">
+        <Image src={img} alt="app-now" className={clsx("w-[18rem] mx-auto md:mx-0 rounded-xl dark:border h-[30rem] object-contain object-[0_1rem]", reverse && 'order-1 md:order-2')} />
+        <div className={clsx("flex flex-col gap-4 grow", reverse && 'order-2 md:order-1', !reverse && '')}>
           {data.points.map(([title, description], i) => (
             <div className="flex gap-4 py-2 rounded-xl" key={i}>
               <Check className="shrink-0 border-2 bg-primary text-primary-foreground w-10 h-10 p-2 rounded-full" />
