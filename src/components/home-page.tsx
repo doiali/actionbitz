@@ -6,6 +6,8 @@ import img_report from '@/../public/static/todo-app-report.png'
 import Image, { StaticImageData } from 'next/image'
 import { Check } from 'lucide-react'
 import clsx from 'clsx'
+import Story from './home-page-story.mdx'
+
 
 export default function Home() {
   return (
@@ -30,6 +32,13 @@ export default function Home() {
           <Item img={img_past} data={data[2]} index={3} />
         </div>
       </section >
+      <section className="flex flex-col items-center py-12">
+        <h2 className="font-bold text-2xl mb-4">My story</h2>
+        <h3 className="font-bold text-lg mb-4">Why Did I Build a Todo App in 2025?</h3>
+        <div className="prose dark:prose-invert prose-sm text-center">
+          <Story />
+        </div>
+      </section>
     </div >
   )
 }
@@ -69,31 +78,31 @@ const Item: React.FC<{
 
 const data: Data[] = [
   {
-    title: 'Simple and easy to do app',
-    points: [
-      ['Simplicity', 'Create tasks, do them, check them! Easy and simple, No more than 5 minutes to learn evrything.', true],
-      ['No big enterprise app', 'No reminders, no notifications, no complexities.', false],
-      ['When you check a task, it won\'t disappear!', 'Let\'s see the actions we take! not just what\'s still left!', true],
-      ['Fresh start everyday', 'If you miss a task, it won\'t keep popping up! It\'ll go to your history. Maybe it was going to the moon! We can\'t do it all!', true],
+    "title": "Simple and Easy To-Do App",
+    "points": [
+      ["Simplicity", "Create tasks, do them, check them! It’s that simple. It should take less than 5 minutes to learn everything."],
+      ["No Big Enterprise App", "No reminders, no notifications, no unnecessary complexities—just straightforward dumping todos."],
+      ["When You Check a Task, It Won’t Disappear!", "Celebrate the actions you’ve taken, not just what’s left to do."],
+      ["Fresh Start Every Day", "All tasks are time-bound. Missed a task? No worries—it moves to your history. Maybe it was going to the moon. We can’t do it all!"]
     ]
   },
   {
-    title: 'Get cool reports',
-    points: [
-      ['See your actions in number', 'Motivation comes after taking action.'],
-      ['See your persistence', 'Weekly and monthly charts showing how much you missed or done!'],
-      ['Move those numbers towards completion', 'Start reading that book that you wanted to do 6 months ago?'],
-      ['And cool charts and graphs', 'I love charts, don\'t you? And I\'ll keep some charts for monetization and premium members!'],
-      ['AI reports!!!!', 'All apps are getting AI powered, why not this one? It would be cool though'],
+    "title": "Get Cool Reports",
+    "points": [
+      ["See Your Actions in Numbers", "Motivation often comes after taking action."],
+      ["See Your Persistence", "Weekly and monthly charts show how much you’ve accomplished or missed."],
+      ["Move Those Numbers Toward Completion", "Start reading that book you’ve been putting off for six months!"],
+      ["Cool Charts and Graphs", "Who doesn’t love charts? We’ll even keep some exclusive ones for premium members!"],
+      ["AI Reports!!!", "Everything is AI-powered these days, so why not here? It’d be cool, right?"]
     ]
   },
   {
-    title: 'Journal and timeline',
-    points: [
-      ['Keep a history timeline of your todos', 'Those bitz of action you did!. Browse your journal Periodically, See what you missed and maybe you can do now!'],
-      ['Did you build some atomic habits?', 'I\'ll add repeating tasks and a habit tracker if that\'s what you like! But this app should remain simple! no more than 5 minutes to learn everything!'],
-      ['Are you getting 1% better every day?', 'Learn and find out what you could do better! What was important and what wasn\'t worth it'],
-      ['And of course a timeline of future todos', 'The focus is primarily on what you could do today, or tomorrow! But planning for future todos is fully supported!'],
+    "title": "Journal and Timeline",
+    "points": [
+      ["Keep a History Timeline of Your Todos", "Track those bits of action you’ve taken! Periodically browse your journal, see what you’ve missed, and maybe tackle them now."],
+      ["Did You Build Some Atomic Habits?", "Repeating tasks and habit tracking might come later—if that’s what you like. But this app will always stay simple. No more than 5 minutes to learn it all!"],
+      ["Are You Getting 1% Better Every Day?", "Reflect on what you could improve. What mattered, and what wasn’t worth it?"],
+      ["A Timeline of Future Todos", "Focus on today or tomorrow, but planning for future todos is always supported!"]
     ]
-  },
+  }
 ]
