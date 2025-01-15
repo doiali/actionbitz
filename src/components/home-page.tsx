@@ -14,7 +14,7 @@ import { Button } from './ui/button'
 export default function Home() {
   return (
     <div className="flex flex-col px-4">
-      <section className="flex justify-center items-center text-center min-h-[100vh]">
+      <section className="flex justify-center items-center text-center min-h-[100vh] py-24 border-b">
         <div className="flex flex-col items-center">
           <h1 className="mb-4 text-3xl sm:text-5xl lg:text-6xl">
             Simple Journaling Todo App
@@ -24,7 +24,7 @@ export default function Home() {
           <StartButton />
         </div>
       </section>
-      <section className="bg-background/85">
+      <section className="bg-background/85 pt-12 pb-24 border-b">
         <div className="py-12 relative w-full max-w-3xl mx-auto">
           <h1 className="relative text-center text-3xl font-bold px-4">How it works?</h1>
         </div>
@@ -34,22 +34,24 @@ export default function Home() {
           <Item img={img_past} data={data[2]} index={3} />
         </div>
       </section >
-      <section className="flex flex-col items-center py-12">
+      <section className="flex flex-col items-center py-24">
         <h2 className="font-bold text-3xl mb-4">My story</h2>
         <h3 className="font-bold text-lg mb-4">Why Did I Build a Todo App in 2025?</h3>
         <div className="prose dark:prose-invert prose-sm text-center">
           <Story />
         </div>
       </section>
-      <section className="w-full max-w-3xl mx-auto flex flex-col py-12">
-        <h2 className="font-bold text-3xl mb-6 text-center">Pricing</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mx-auto">
-          <PriceCard data={plans[0]} />
-          <PriceCard data={plans[1]} />
+      <section className="py-24 bg-background/85 border-t">
+        <div className="flex flex-col w-full max-w-3xl mx-auto">
+          <h2 className="font-bold text-3xl mb-6 text-center">Pricing</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mx-auto">
+            <PriceCard data={plans[0]} />
+            <PriceCard data={plans[1]} />
+          </div>
+          <p className="text-center text-sm text-muted-foreground mt-10 max-w-xl mx-auto">
+            Please note that Actionbitz is still in its early stages and requires further testing. If you encounter any issues, I’d greatly appreciate it if you could report them. And if you have any suggestions or feedback, don’t hesitate to let me know. I’d love to hear from you!
+          </p>
         </div>
-        <p className="text-center text-sm text-muted-foreground mt-10 mb-16 max-w-xl mx-auto">
-          Please note that Actionbitz is still in its early stages and requires further testing. If you encounter any issues, I’d greatly appreciate it if you could report them. And if you have any suggestions or feedback, don’t hesitate to let me know. I’d love to hear from you!
-        </p>
       </section>
     </div >
   )
@@ -111,16 +113,16 @@ const Item: React.FC<{
         <h2 className="font-semibold text-2xl mt-4">{data.title}</h2>
       </div>
       <div className="py-12 items-start flex">
-        <Image src={img} alt="app-now" className={clsx("w-[18rem] rounded-xl border h-[30rem] object-contain object-[0_1rem]", reverse && 'order-1 md:order-2')} />
-        <div className={clsx("flex flex-col gap-4 px-8 grow", reverse && 'order-2 md:order-1')}>
+        <Image src={img} alt="app-now" className={clsx("w-[18rem] rounded-xl dark:border h-[30rem] object-contain object-[0_1rem]", reverse && 'order-1 md:order-2')} />
+        <div className={clsx("flex flex-col gap-4 grow", reverse && 'order-2 md:order-1 md:pe-12', !reverse && 'md:ms-12')}>
           {data.points.map(([title, description], i) => (
-            <div className="flex gap-4 p-2 px-6 rounded-xl" key={i}>
+            <div className="flex gap-4 py-2 rounded-xl" key={i}>
               <Check className="shrink-0 border-2 bg-primary text-primary-foreground w-10 h-10 p-2 rounded-full" />
               <div className="flex flex-col gap-2">
-                <div>
+                <h4>
                   {title}
-                </div>
-                <div className="text-muted-foreground text-sm">{description}</div>
+                </h4>
+                <p className="text-muted-foreground text-sm">{description}</p>
               </div>
             </div>
           ))}
