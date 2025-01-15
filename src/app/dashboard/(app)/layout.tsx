@@ -1,13 +1,9 @@
 'use client'
 
+import { DateTabContext, tabs } from '@/components/entry-page'
 import { TabNav, TabNavLink, TabNavList } from '@/components/ui/tabnav'
 import Link from 'next/link'
 import { useSelectedLayoutSegment } from 'next/navigation'
-import { createContext, useContext } from 'react'
-
-const DateTabContext = createContext('now' as 'now' | 'past' | 'future')
-export const useDateTabContext = () => useContext(DateTabContext)
-const tabs = ['past', 'now', 'future'] as const
 
 export default function Layout({ children }: { children: React.ReactNode }) {
 
