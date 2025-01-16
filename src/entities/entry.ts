@@ -5,7 +5,7 @@ import { EntryType } from '@prisma/client'
 import { InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { createDraft, Draft, produce } from 'immer'
-import { isEqual, startOfToday, startOfTomorrow } from 'date-fns'
+import { isEqual, startOfDay, startOfToday, startOfTomorrow } from 'date-fns'
 import { EntryReport, getReportParamsByTab } from './enrty-report'
 
 export type ListAPI<T> = {
@@ -65,13 +65,13 @@ export const getEntryTab: (entryDate: Date) => 'past' | 'now' | 'future' = (entr
   return 'future'
 }
 
-export const getInitialEntry: () => EntryCreate = () => ({
+export const getInitialEntry: (date?: Date) => EntryCreate = (date) => ({
   title: '',
   type: 'TODO',
   description: '',
   completed: false,
   datetime: null,
-  date: startOfToday(),
+  date: date ? startOfDay(date) : startOfToday(),
 })
 
 export const parseEntry: (e: EntryJson) => EntryData = (entry: EntryJson) => {

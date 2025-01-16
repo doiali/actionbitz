@@ -6,20 +6,20 @@ import { EntryCreate, getInitialEntry, useEntryCreate } from '@/entities/entry'
 import EntryForm from './entry-form'
 import { Plus } from 'lucide-react'
 
-export default function EntryAddButton() {
+export default function EntryAddButton({ date }: { date?: Date }) {
   const [showForm, setShowForm] = useState(false)
-  const [state, setState] = useState<EntryCreate>(getInitialEntry())
+  const [state, setState] = useState<EntryCreate>(() => getInitialEntry(date))
 
   const mutation = useEntryCreate({
     onSuccess: () => {
-      setState(getInitialEntry())
+      setState(getInitialEntry(date))
       setShowForm(false)
     }
   })
 
   const handleClose = () => {
     setShowForm(false)
-    setState(getInitialEntry())
+    setState(getInitialEntry(date))
   }
 
   const onChange = <T extends keyof EntryCreate>(name: T, value: EntryCreate[T]) => {
