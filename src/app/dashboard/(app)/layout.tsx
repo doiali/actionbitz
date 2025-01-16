@@ -21,7 +21,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </TabNavLink>
           <TabNavLink active={activeSegment === 'now'} asChild>
             <Link href="/dashboard/now">
-              Now
+              Today
             </Link>
           </TabNavLink>
           <TabNavLink active={activeSegment === 'future'} asChild>
