@@ -113,7 +113,7 @@ export const getEntries = withAuth(async (req) => {
       take: limit,
       skip: offset,
       orderBy: order === 'asc'
-        ? [{ date: 'asc' }, { id: 'asc' }]
+        ? [{ date: 'asc' }, { id: 'desc' }]
         : [{ date: 'desc' }, { id: 'desc' }]
     })).map((entry) => ({ ...entry, id: Number(entry.id) }))
   }
