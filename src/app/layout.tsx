@@ -24,9 +24,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Actionbitz - Get Things Done, bitz by bitz",
+  title: "Actionbitz - Simple todo app with a journal of your actions",
   description:
-    "Take action and do what you gotta do. Track all your action bitz, bitz by bitz with Actionbitz. Level up 1% every single day!",
+    "Simple Todo app for busy individuals with lots of todos! Those who know plannig to do the thing is not doing the thing!",
   keywords: [
     "todo app",
     "task management",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Actionbitz - Get Things Done, Bit by Bit",
     description:
-      "Take action and do what you gotta do. Track all your action bitz, bitz by bitz with Actionbitz. Level up 1% every single day",
+      "Simple Todo app for busy individuals with lots of todos! Those who know plannig to do the thing is not doing the thing!",
     url: "https://actionbitz.com",
     siteName: "Actionbitz",
     images: [
@@ -44,16 +44,16 @@ export const metadata: Metadata = {
         url: "https://actionbitz.com/actionbitz.png", // Replace with your actual image URL
         width: 1200,
         height: 630,
-        alt: "Actionbitz - Get Things Done, bitz by bitz",
+        alt: "Actionbitz - Simple todo app with a journal of your actions",
       },
     ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Actionbitz - Get Things Done, bitz by bitz",
+    title: "Actionbitz - Simple todo app with a journal of your actions",
     description:
-      "Take action and do what you gotta do. Track all your action bitz, bitz by bitz with Actionbitz. Level up 1% every single day!",
+      "Simple Todo app for busy individuals with lots of todos! Those who know plannig to do the thing is not doing the thing!",
     images: ["https://actionbitz.com/actionbitz.png"], // Replace with your actual image URL
   },
 }
