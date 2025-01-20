@@ -33,7 +33,7 @@ export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' |
 
 
   const groupedEntries = useMemo(() => allData.reduce((acc, entry) => {
-    const entryDate = format(entry.date, 'MMMM d, yyyy')
+    const entryDate = format(entry.date, 'EEEE, MMMM d, yyyy')
     const group = acc.find(x => x.dateLabel === entryDate)
     if (!group) {
       acc.push({
