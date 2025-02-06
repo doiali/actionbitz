@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     siteName: "Actionbitz",
     images: [
       {
-        url: "https://actionbitz.com/actionbitz.png", // Replace with your actual image URL
+        url: "https://actionbitz.com/static/landing-cover.png", // Replace with your actual image URL
         width: 1200,
         height: 630,
         alt: "Actionbitz - Simple todo app with a journal of your actions",
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     title: "Actionbitz - Simple todo app with a journal of your actions",
     description:
       "Simple Todo app for busy individuals with lots of todos! Those who know plannig to do the thing is not doing the thing!",
-    images: ["https://actionbitz.com/actionbitz.png"], // Replace with your actual image URL
+    images: ["https://actionbitz.com/static/landing-cover.png"], // Replace with your actual image URL
   },
 }
 
