@@ -3,6 +3,8 @@ import PrivacyPolicy from './privacy-policy.mdx';
 
 export const metadata: Metadata = {
   title: 'Actionbitz - Privacy Policy',
+  description: 'Read the privacy policy of Actionbitz to understand how we handle your data and privacy.',
+  keywords: ['privacy policy', 'Actionbitz', 'data privacy', 'user data'],
 }
 
 export default function PrivacyPolicyPage() {
