@@ -65,11 +65,12 @@ const WeeklyReport: React.FC = () => {
   const { data } = useEntryDailyReport()
   const { label, setWeek, weekDays } = useWeekSelector()
   const chartData = weekDays.map((d => {
-    const { count = 0, done = 0 } = data?.find(x => isSameDay(x.date, d)) ?? {}
+    const { count = 0, done = 0, ignored = 0, } = data?.find(x => isSameDay(x.date, d)) ?? {}
     return {
       day: format(d, 'EEEE'),
       done,
-      missed: count - done,
+      missed: count - (done + ignored),
+      ignored: ignored,
     }
   }))
 

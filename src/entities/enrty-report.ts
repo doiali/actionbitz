@@ -6,19 +6,21 @@ import { startOfToday, startOfTomorrow } from 'date-fns'
 export type EntryReport = {
   count: number,
   completed: number,
+  ignored: number,
   days: number,
   totalDays: number,
   daysActive: number,
 }
 
 export type EntryDailyReportJson = [
-  string, number, number
-] // date, count, done
+  string, number, number, number,
+] // date, count, done, ignored
 
 export type EntryDailyReport = {
   date: Date,
   count: number,
   done: number,
+  ignored: number,
 }
 
 export type EntryReportParams = {
@@ -53,7 +55,7 @@ export const useEntryDailyReport = () => {
     queryKey: ['entry/report/daily'],
     queryFn: () => apiClient.get<EntryDailyReportJson[]>(`entry/report/daily`).json()
       .then(x => x.map(y => ({
-        date: parseDate(y[0]), count: y[1], done: y[2]
+        date: parseDate(y[0]), count: y[1], done: y[2], ignored: y[3],
       }) satisfies EntryDailyReport)),
   })
 }

@@ -31,9 +31,10 @@ export const getEntryReport = withAuth(async (req) => {
   const sql = Prisma.sql`
     SELECT 
       COUNT(*) AS "count"
-      ,SUM(CASE WHEN completed = true THEN 1 ELSE 0 END) AS "completed"
+      ,SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) AS "completed"
+      ,SUM(CASE WHEN status = 'ignored' THEN 1 ELSE 0 END) AS "ignored"
       ,COUNT(DISTINCT "date") AS "days"
-      ,COUNT(DISTINCT CASE WHEN completed = true THEN "date" END) AS "daysActive"
+      ,COUNT(DISTINCT CASE WHEN status = 'done' THEN "date" END) AS "daysActive"
       ,MAX("date") - MIN("date") as "totalDays"
     FROM "Entry"
     WHERE "userId" = ${userId}
@@ -41,14 +42,15 @@ export const getEntryReport = withAuth(async (req) => {
     AND ${to ? Prisma.sql`"date" < ${new Date(to)}::date` : Prisma.sql`1=1`}
   `
   const result = await prisma.$queryRaw(sql) as EntryReport[]
-  const { count, completed, days, totalDays, daysActive } = result[0]
+  const { count, completed, days, totalDays, daysActive, ignored } = result[0]
 
   return NextResponse.json({
     count: Number(count),
     completed: Number(completed),
     days: Number(days),
     totalDays: Number(totalDays),
-    daysActive: Number(daysActive)
+    daysActive: Number(daysActive),
+    ignored: Number(ignored),
   } satisfies EntryReport)
 })
 
@@ -61,9 +63,10 @@ export const getEntryDailyReport = withAuth(async (req) => {
 
   const sql = Prisma.sql`
     SELECT 
-       "date"
+      "date"
       ,COUNT(*) AS "count"
-      ,SUM(CASE WHEN completed = true THEN 1 ELSE 0 END) AS "done"
+      ,SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) AS "done"
+      ,SUM(CASE WHEN status = 'ignored' THEN 1 ELSE 0 END) AS "ignored"
     FROM "Entry"
     WHERE "userId" = ${userId}
     AND ${from ? Prisma.sql`"date" >= ${new Date(from)}::date` : Prisma.sql`1=1`}
@@ -71,14 +74,12 @@ export const getEntryDailyReport = withAuth(async (req) => {
     GROUP BY "date"
     ORDER BY "date" DESC
   `
-  const result = await prisma.$queryRaw(sql) as { date: Date, count: number, done: number }[]
+  const result = await prisma.$queryRaw(sql) as { date: Date, count: number, done: number, ignored: number }[]
 
   return NextResponse.json(
-    result.map(x => ([serializeDateServer(x.date), Number(x.count), Number(x.done)]))
+    result.map(x => ([serializeDateServer(x.date), Number(x.count), Number(x.done), Number(x.ignored)]))
   )
 })
-
-
 
 export const getEntries = withAuth(async (req) => {
   const userId = req.auth.user.id
@@ -104,7 +105,7 @@ export const getEntries = withAuth(async (req) => {
     data = (await prisma.entry.findMany({
       select: {
         id: true, title: true, description: true, date: true,
-        datetime: true, completed: true, type: true,
+        datetime: true, status: true, type: true,
       },
       where: {
         userId: userId,
@@ -161,7 +162,7 @@ export const createEntry = withAuth(async (req) => {
 export const updateEntry = withAuth<{ id: string }>(async (req, { params }) => {
   const userId = req?.auth?.user?.id
   const { id } = await params
-  const { title, description, datetime, type, completed, date } = await req.json() as EntryJson
+  const { title, description, datetime, type, status, date } = await req.json() as EntryJson
   const entry = await prisma.entry.findFirst({
     where: { userId, id: Number(id) },
   })
@@ -175,7 +176,7 @@ export const updateEntry = withAuth<{ id: string }>(async (req, { params }) => {
       description,
       datetime,
       date: parseDateServer(date),
-      completed,
+      status,
     }
   })
 
@@ -217,7 +218,7 @@ export const createDummyEntries = withAuth(async (req) => {
     type: faker.helpers.arrayElement(['NOTE', 'TODO']),
     title: faker.lorem.sentence({ min: 3, max: 10 }),
     description: faker.lorem.paragraph({ min: 0, max: 3 }),
-    completed: faker.datatype.boolean(),
+    status: faker.helpers.arrayElement(['done', 'ignored', 'todo']),
     date: faker.date.between({ from: '2024-11-01', to: '2025-02-01' }),
     userId: userId,
   } satisfies EntryCreate & { userId: string }))

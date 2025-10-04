@@ -15,8 +15,6 @@ const eslintConfig = [
     rules: {
       "@typescript-eslint/no-unused-vars": "warn",
       "prefer-const": "warn",
-      "quotes": ["warn", "double", { avoidEscape: true, allowTemplateLiterals: true }],
-      "jsx-quotes": ["warn", "prefer-double"],
       "semi": ["warn", "never"],
     },
   },

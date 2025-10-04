@@ -1,7 +1,7 @@
 import apiClient from '@/utils/apiClient'
 import { SerializedModel } from '@/utils/types'
 import { parseDate, parseDateTimeSafe, serializeDate, serializeDateTimeSafe } from '@/utils/utils'
-import { EntryType } from '@prisma/client'
+import { EntryStatus, EntryType } from '@prisma/client'
 import { InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { createDraft, Draft, produce } from 'immer'
@@ -19,7 +19,7 @@ export type EntryCreate = {
   title: string
   type?: EntryType
   description?: string | null
-  completed?: boolean
+  status?: EntryStatus
   date: Date
   datetime?: Date | null
 }
@@ -126,7 +126,7 @@ export const useEntryCreate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
           type: type || 'TODO',
           date: serializeDate(date),
           datetime: serializeDateTimeSafe(datetime),
-          completed: false,
+          status: EntryStatus.todo,
         } satisfies Omit<EntryJson, 'id'>
       }).json().then(d => parseEntry(d))
     ),
@@ -157,13 +157,13 @@ export const useEntryUpdate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({
-      id, title, description, completed, type, datetime, date
+      id, title, description, status, type, datetime, date
     }: EntryCreate & { id: number, prev?: EntryData }) => (
       apiClient.put<EntryJson>(`entry/${id}`, {
         json: {
           title,
           description: description || null,
-          completed,
+          status,
           type,
           date: serializeDate(date),
           datetime: serializeDateTimeSafe(datetime),
@@ -175,12 +175,12 @@ export const useEntryUpdate = ({ onSuccess }: { onSuccess?: (data: EntryData) =>
 
       // update report
       const tab = getEntryTab(data.date)
-      if (isSameDate && data.completed !== prev.completed) {
+      if (isSameDate && data.status !== prev.status) {
         queryClient.setQueriesData<EntryReport>(
           { queryKey: ['entry/report', getReportParamsByTab(tab)] },
           (prev) => (prev ? {
             ...prev,
-            completed: prev.completed + (data.completed ? 1 : -1),
+            st: prev.completed + (data.status === 'done' ? 1 : -1),
           } : undefined)
         )
       }

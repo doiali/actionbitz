@@ -20,6 +20,10 @@ const chartConfig = {
     label: "Done",
     color: "hsl(var(--chart-3))",
   },
+  ignored: {
+    label: "Ignored",
+    color: "hsl(var(--chart-3) / 0.1)",
+  },
   missed: {
     label: "Missed",
     color: "hsl(var(--chart-muted))",
@@ -44,6 +48,12 @@ export const EntryWeeklyChart: React.FC<{ data: WeekyData[] }> = ({ data: chartD
           dataKey="done"
           stackId="a"
           fill="var(--color-done)"
+          radius={[0, 0, 4, 4]}
+        />
+        <Bar
+          dataKey="ignored"
+          stackId="a"
+          fill="var(--color-ignored)"
           radius={[0, 0, 4, 4]}
         />
         <Bar

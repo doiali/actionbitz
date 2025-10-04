@@ -90,17 +90,23 @@ enum EntryType {
   NOTE
 }
 
+enum EntryStatus {
+  todo
+  ignored
+  done
+}
+
 model Entry {
-  id          BigInt    @id @default(autoincrement())
-  type        EntryType @default(TODO)
+  id          BigInt      @id @default(autoincrement())
+  type        EntryType   @default(TODO)
   title       String
   description String?
-  isFavorite  Boolean   @default(false)
-  completed   Boolean   @default(false)
-  datetime    DateTime?  @db.Timestamptz()
-  date        DateTime  @db.Date()
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  isFavorite  Boolean     @default(false)
+  status      EntryStatus @default(todo)
+  datetime    DateTime?   @db.Timestamptz()
+  date        DateTime    @db.Date()
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   userId      String
-  user        User      @relation(fields: [userId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
 }

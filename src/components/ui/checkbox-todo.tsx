@@ -2,12 +2,17 @@
 
 import * as React from "react"
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
-import { Check } from "lucide-react"
+import { Check, Minus } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { EntryStatus } from '@prisma/client'
 
-const CheckboxTodo: React.FC<React.ComponentProps<typeof CheckboxPrimitive.Root>> = ({
-  className, ...props
+type CheckboxTodoProps = React.ComponentProps<typeof CheckboxPrimitive.Root> & {
+  status?: EntryStatus
+}
+
+const CheckboxTodo: React.FC<CheckboxTodoProps> = ({
+  className, status = 'todo', ...props
 }) => (
   <CheckboxPrimitive.Root
     className={cn(
@@ -15,11 +20,13 @@ const CheckboxTodo: React.FC<React.ComponentProps<typeof CheckboxPrimitive.Root>
       className
     )}
     {...props}
+    checked={status !== 'todo'}
   >
     <CheckboxPrimitive.Indicator
       className={cn("flex items-center justify-center text-current")}
     >
-      <Check className="h-6 w-6 absolute" />
+      {status === 'done' && <Check className="h-6 w-6 absolute" />}
+      {status === 'ignored' && <Minus className="h-6 w-6 absolute" />}
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
 )

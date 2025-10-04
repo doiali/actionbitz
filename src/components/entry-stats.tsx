@@ -49,16 +49,16 @@ const EntryStats: React.FC<{ tab?: 'past' | 'now' | 'future' }> = ({ tab = 'now'
 }
 
 export const EntryPastStats: React.FC<{ data?: EntryReport }> = ({ data }) => {
-  const { count = 0, completed = 0, days = 0, daysActive = 0, totalDays = 0 } = data || {}
-  const r = count ? completed / count : 0
+  const { count = 0, completed = 0, ignored = 0, days = 0, totalDays = 0 } = data || {}
+  const r = count ? (completed + ignored) / count : 0
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="flex flex-col gap-2 text-muted-foreground text-sm">
-        <span>Last <Stat value={totalDays} /> days</span>
-        <span>Active <Stat value={daysActive} /> of <Stat value={days} /> days</span>
+        <span>Days: <Stat value={days} /> of <Stat value={totalDays} /></span>
+        <span>Done: <Stat value={completed} /></span>
         <span className="flex gap-2 ">
-          <span>Done: <Stat value={completed} /></span>
-          <span>Missed: <Stat value={count - completed} /></span>
+          <span>ignored: <Stat value={ignored} /></span>
+          <span>Missed: <Stat value={count - (completed + ignored)} /></span>
         </span>
       </div>
       <div className="flex flex-row justify-center pb-0 h-[110px]">

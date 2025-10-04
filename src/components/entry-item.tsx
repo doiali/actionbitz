@@ -7,12 +7,21 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from '@/components/ui/button'
 import { EllipsisVerticalIcon } from '@heroicons/react/24/outline'
 import { CheckboxTodo } from '@/components/ui/checkbox-todo'
+import { isPast } from '@/lib/utils'
+import { EntryStatus } from '@prisma/client'
+
+const getNextStatus: (status?: EntryStatus) => EntryStatus = (status = 'todo') => {
+  if (status === 'todo') return EntryStatus.ignored
+  if (status === 'ignored') return EntryStatus.done
+  return EntryStatus.todo
+}
 
 const EntryItem = ({ entry }: {
   entry: EntryData
 }) => {
   const [edit, setEdit] = useState(false)
   const mutation = useEntryUpdate()
+  const isPastEntry = isPast(entry.date)
 
   return (
     <li key={entry.id} className="py-2 border-t">
@@ -20,10 +29,10 @@ const EntryItem = ({ entry }: {
         <div key={entry.id} className="flex items-center px-4">
           <CheckboxTodo
             className="me-4 w-6 h-6 rounded-full"
-            checked={entry.completed}
+            status={entry.status}
             onClick={() => mutation.mutate({
               ...entry,
-              completed: !entry.completed,
+              status: isPastEntry ? getNextStatus(entry.status) : (entry.status !== 'done' ? 'done' : 'todo'),
               prev: entry,
             })}
             disabled={mutation.isPending}
