@@ -15,7 +15,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   events: {
     createUser: async ({ user }) => {
-      await seedUserTodos(user)
+      // await seedUserTodos(user)
     }
   },
   callbacks: {
