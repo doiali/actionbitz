@@ -8,6 +8,7 @@ import { format } from 'date-fns'
 import { Skeleton } from '@/components/ui/skeleton'
 import EntryItem from './entry-item'
 import EntryForm from './entry-form'
+import { useEntryFilters } from '@/entities/entry-filters'
 
 const noData = {
   past: {
@@ -25,7 +26,8 @@ const noData = {
 }
 
 export default function EntryList({ type = 'future' }: { type?: 'now' | 'past' | 'future' }) {
-  const query = useEntryList(type)
+  const { filters } = useEntryFilters()
+  const query = useEntryList(type, filters)
   const {
     isLoading, isError, allData, isSuccess,
     hasNextPage, fetchNextPage, isFetchingNextPage

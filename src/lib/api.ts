@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { EntryCreate, EntryData, EntryJson } from '@/entities/entry'
 import { faker } from '@faker-js/faker'
 import { EntryReport } from '@/entities/enrty-report'
-import { Prisma } from '@prisma/client'
+import { EntryStatus, Prisma } from '@prisma/client'
 import { parseDateServer, serializeDateServer } from '@/utils/utils'
 
 
@@ -88,6 +88,8 @@ export const getEntries = withAuth(async (req) => {
   const from = searchParams.get('from')
   const to = searchParams.get('to')
   const order = searchParams.get('order') || 'desc'
+  const q = searchParams.get('q')
+  const status = (searchParams.get('status') as EntryStatus) || null
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let dateFilter: any = {}
@@ -95,8 +97,20 @@ export const getEntries = withAuth(async (req) => {
   if (to) dateFilter.lt = parseDateServer(to)
   if (!from && !to) dateFilter = undefined
 
+  const where: Prisma.EntryWhereInput = {
+    userId,
+    date: dateFilter,
+    ...(q ? {
+      OR: [
+        { title: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } }
+      ]
+    } : {}),
+    ...(status ? { status } : {})
+  }
+
   const count = await prisma.entry.count({
-    where: { userId, date: dateFilter }
+    where
   })
 
   let data: EntryData[] = []
@@ -107,10 +121,7 @@ export const getEntries = withAuth(async (req) => {
         id: true, title: true, description: true, date: true,
         datetime: true, status: true, type: true,
       },
-      where: {
-        userId: userId,
-        date: dateFilter,
-      },
+      where,
       take: limit,
       skip: offset,
       orderBy: order === 'asc'
@@ -214,12 +225,12 @@ export const createDummyEntries = withAuth(async (req) => {
   await prisma.entry.deleteMany({
     where: { userId }
   })
-  const entries = Array.from({ length: 400 }).map(() => ({
+  const entries = Array.from({ length: 800 }).map(() => ({
     type: faker.helpers.arrayElement(['NOTE', 'TODO']),
     title: faker.lorem.sentence({ min: 3, max: 10 }),
     description: faker.lorem.paragraph({ min: 0, max: 3 }),
     status: faker.helpers.arrayElement(['done', 'ignored', 'todo']),
-    date: faker.date.between({ from: '2024-11-01', to: '2025-02-01' }),
+    date: faker.date.between({ from: '2024-11-01', to: '2025-12-01' }),
     userId: userId,
   } satisfies EntryCreate & { userId: string }))
 

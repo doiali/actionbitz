@@ -7,6 +7,7 @@ import { useMemo } from 'react'
 import { createDraft, Draft, produce } from 'immer'
 import { isEqual, startOfDay, startOfToday, startOfTomorrow } from 'date-fns'
 import { EntryReport, getReportParamsByTab } from './enrty-report'
+import { EntryFiltersType } from './entry-filters'
 
 export type ListAPI<T> = {
   count: number,
@@ -41,11 +42,13 @@ export type EntryParams = {
 
 const LIMIT = 30
 
-export const getEntrySearchParams = (params: EntryParams) => {
+export const getEntrySearchParams = (params: EntryParams & EntryFiltersType) => {
   const searchParams = new URLSearchParams()
   if (params.from) searchParams.set('from', serializeDate(params.from))
   if (params.to) searchParams.set('to', serializeDate(params.to))
   if (params.order) searchParams.set('order', params.order)
+  if (params.q) searchParams.set('q', params.q)
+  if (params.status) searchParams.set('status', params.status)
   return searchParams
 }
 
@@ -84,13 +87,13 @@ export const parseEntry: (e: EntryJson) => EntryData = (entry: EntryJson) => {
   }
 }
 
-export const useEntryList = (tab: 'past' | 'now' | 'future' = 'now') => {
+export const useEntryList = (tab: 'past' | 'now' | 'future' = 'now', filters: EntryFiltersType) => {
   const params = getParamsByTab(tab)
   const result = useInfiniteQuery<ListAPI<EntryData>>({
-    queryKey: ['entry', params],
+    queryKey: ['entry', params, filters],
     queryFn: ({ pageParam }) => {
       const { limit, offset } = pageParam as { limit: number, offset: number }
-      const searchParams = getEntrySearchParams(params)
+      const searchParams = getEntrySearchParams({ ...params, ...filters })
       searchParams.set('limit', String(limit))
       searchParams.set('offset', String(offset))
       return apiClient.get<ListAPI<EntryJson>>(`entry?${searchParams}`).json()
